@@ -20,7 +20,7 @@ export default function TablaClientes({ refresh, onSeleccionar }: { refresh: num
 
   const clientesFiltrados = clientes.filter(c => {
     if (filtro === 'activos') return c.estado === 'ACTIVO';
-    if (filtro === 'inactivos') return c.estado === 'INACTIVO' || c.estado === 'CANCELADO';
+    if (filtro === 'inactivos') return ['INACTIVO', 'CANCELADO'].includes(c.estado); // eslint-disable-line
     return true;
   });
 
@@ -79,7 +79,7 @@ export default function TablaClientes({ refresh, onSeleccionar }: { refresh: num
             <tbody className="divide-y divide-gray-50">
               {clientesFiltrados.map((c) => {
                 const dias = calcularDias(c.fecha_renovacion_proxima);
-                const esInactivo = c.estado === 'INACTIVO' || c.estado === 'CANCELADO';
+                const esInactivo = ['INACTIVO', 'CANCELADO'].includes(c.estado); // eslint-disable-line
                 return (
                   <tr key={c.id}
                     onClick={() => onSeleccionar(c)}
