@@ -51,7 +51,7 @@ export default function TablaClientes({ refresh, onSeleccionar }: { refresh: num
               filtro === f.key ? 'bg-white/20' : 'bg-gray-200'
             }`}>
               {f.key === 'activos' ? clientes.filter(c => c.estado === 'ACTIVO').length :
-               f.key === 'inactivos' ? clientes.filter(c => c.estado === 'INACTIVO' || c.estado === 'CANCELADO').length :
+               f.key === 'inactivos' ? clientes.filter(c => ["INACTIVO","CANCELADO"].includes(c.estado)).length :
                clientes.length}
             </span>
           </button>
