@@ -1,0 +1,134 @@
+mkdir -p ~/Desktop/adobe-manager/app/servicios && cat > ~/Desktop/adobe-manager/app/servicios/page.tsx << 'EOF'
+'use client';
+import { useState, useEffect } from 'react';
+
+const TIPOS = {
+  TURNITIN: { label: 'Turnitin', emoji: '📄', color: 'bg-red-50 text-red-700 border-red-100' },
+  DETECTOR_IA: { label: 'Detector IA', emoji: '🤖', color: 'bg-purple-50 text-purple-700 border-purple-100' },
+  ASESORIA_TESIS: { label: 'Asesoría Tesis', emoji: '📚', color: 'bg-blue-50 text-blue-700 border-blue-100' },
+  DESARROLLO_TESIS: { label: 'Desarrollo Tesis', emoji: '🎓', color: 'bg-green-50 text-green-700 border-green-100' },
+};
+
+const ESTADOS = {
+  PENDIENTE: { label: 'Pendiente', color: 'bg-yellow-50 text-yellow-700' },
+  EN_PROCESO: { label: 'En proceso', color: 'bg-blue-50 text-blue-700' },
+  REVISION: { label: 'En revisión', color: 'bg-orange-50 text-orange-700' },
+  ENTREGADO: { label: 'Entregado', color: 'bg-green-50 text-green-700' },
+  COMPLETADO: { label: 'Completado', color: 'bg-gray-50 text-gray-600' },
+};
+
+export default function ServiciosPage() {
+  const [servicios, setServicios] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState<any>(null);
+  const [filtroTipo, setFiltroTipo] = useState('TODOS');
+  const [filtroEstado, setFiltroEstado] = useState('TODOS');
+  const [refresh, setRefresh] = useState(0);
+  const [form, setForm] = useState({
+    nombre_cliente: '', email_cliente: '', telefono: '',
+    tipo_servicio: 'TURNITIN', descripcion: '', monto: '',
+    porcentaje_actual: '', porcentaje_objetivo: '',
+    fecha_entrega_esperada: '', prioridad: 'NORMAL',
+  });
+  const [loadingForm, setLoadingForm] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+
+  useEffect(() => {
+    fetch('/api/servicios')
+      .then(r => r.json())
+      .then(data => { setServicios(Array.isArray(data) ? data : []); setLoading(false); });
+  }, [refresh]);
+
+  const handleSubmit = async () => {
+    setLoadingForm(true);
+    try {
+      const res = await fetch('/api/servicios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, monto: parseFloat(form.monto) || 0 }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMensaje('✅ Servicio creado');
+      setRefresh(r => r + 1);
+      setTimeout(() => { setMostrarForm(false); setMensaje(''); }, 1500);
+    } catch (err: any) {
+      setMensaje('❌ ' + err.message);
+    } finally {
+      setLoadingForm(false);
+    }
+  };
+
+  const handleActualizarEstado = async (servicio: any, nuevoEstado: string) => {
+    await fetch(`/api/servicios/${servicio.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...servicio, estado: nuevoEstado }),
+    });
+    setRefresh(r => r + 1);
+    if (servicioSeleccionado?.id === servicio.id) {
+      setServicioSeleccionado({ ...servicioSeleccionado, estado: nuevoEstado });
+    }
+  };
+
+  const handleActualizarEtapa = async (etapaId: string, nuevoEstado: string) => {
+    await fetch('/api/etapas', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: etapaId, estado: nuevoEstado }),
+    });
+    setRefresh(r => r + 1);
+  };
+
+  const serviciosFiltrados = servicios.filter(s => {
+    if (filtroTipo !== 'TODOS' && s.tipo_servicio !== filtroTipo) return false;
+    if (filtroEstado !== 'TODOS' && s.estado !== filtroEstado) return false;
+    return true;
+  });
+
+  const stats = {
+    total: servicios.length,
+    pendientes: servicios.filter(s => s.estado === 'PENDIENTE').length,
+    enProceso: servicios.filter(s => s.estado === 'EN_PROCESO').length,
+    completados: servicios.filter(s => s.estado === 'COMPLETADO').length,
+  };
+
+  const esTurnitin = (tipo: string) => tipo === 'TURNITIN' || tipo === 'DETECTOR_IA';
+  const esTesis = (tipo: string) => tipo === 'ASESORIA_TESIS' || tipo === 'DESARROLLO_TESIS';
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      {/* HEADER */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <a href="/" className="text-gray-400 hover:text-gray-600 text-sm">← Adobe Manager</a>
+            <div className="w-px h-4 bg-gray-200" />
+            <div>
+              <h1 className="text-base font-semibold text-gray-900">Centro de Servicios</h1>
+              <p className="text-xs text-gray-400">Turnitin · IA · Asesorías · Tesis</p>
+            </div>
+          </div>
+          <button onClick={() => setMostrarForm(!mostrarForm)}
+            className="px-4 py-1.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors font-medium">
+            {mostrarForm ? '✕ Cerrar' : '+ Nuevo servicio'}
+          </button>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* MÉTRICAS */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
+          {[
+            { label: 'Total servicios', value: stats.total, color: 'text-gray-900' },
+            { label: 'Pendientes', value: stats.pendientes, color: 'text-yellow-600' },
+            { label: 'En proceso', value: stats.enProceso, color: 'text-blue-600' },
+            { label: 'Completados', value: stats.completados, color: 'text-green-600' },
+          ].map(card => (
+            <div key={card.label} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">{card.label}</p>
+              <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+            </div>
+          ))}
