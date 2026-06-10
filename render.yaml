@@ -7,8 +7,8 @@ services:
     runtime: node
     plan: free
     buildCommand: npm ci && npm run build
-    preDeployCommand: npm run db:migrate
-    startCommand: npm start
+    # Migraciones al arrancar (funciona en cualquier plan, incl. free).
+    startCommand: npm run db:migrate && npm start
     healthCheckPath: /login
     autoDeploy: true
     envVars:
