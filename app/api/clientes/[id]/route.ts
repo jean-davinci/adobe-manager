@@ -1,47 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { actualizarCliente, eliminarCliente } from '@/lib/clientes';
+import { enviarCodigoAcceso } from '@/lib/automatizaciones';
+import { notificarRenovacion } from '@/lib/email';
 
-export async function PUT(req: NextRequest, context: any) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
     const body = await req.json();
-
-    const updateData: any = {
+    const data = await actualizarCliente(id, {
       fecha_renovacion_proxima: body.fecha_renovacion_proxima,
-      costo_servicio: parseFloat(body.costo_servicio),
-      plan_duracion: parseInt(body.plan_duracion),
-      updated_at: new Date().toISOString(),
-    };
-
-    if (body.estado) updateData.estado = body.estado;
-    if (body.contraseña_adobe && body.contraseña_adobe.trim() !== '') {
-      updateData.contraseña_adobe_encriptada = body.contraseña_adobe;
+      costo_servicio: body.costo_servicio != null ? parseFloat(body.costo_servicio) : undefined,
+      plan_duracion: body.plan_duracion != null ? parseInt(body.plan_duracion) : undefined,
+      estado: body.estado,
+      contraseña_adobe: body.contraseña_adobe,
+    });
+    // Automatización: al activar/renovar el afiliado, enviar código por WhatsApp
+    // y notificación de renovación por email.
+    if (body.estado === 'ACTIVO' && data) {
+      enviarCodigoAcceso(data).catch((e) => console.error('enviarCodigoAcceso:', e));
+      notificarRenovacion(data).catch((e) => console.error('notificarRenovacion:', e));
     }
-
-    const { data, error } = await supabase
-      .from('clientes_adobe')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data);
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, context: any) {
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-
-    const { error } = await supabase
-      .from('clientes_adobe')
-      .delete()
-      .eq('id', id);
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await eliminarCliente(id);
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

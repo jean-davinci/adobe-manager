@@ -1,0 +1,46 @@
+# Render Blueprint — Davinci Labs
+# Crea un Web Service (Node) + Postgres y los conecta. Migraciones en preDeploy.
+# Uso: Render Dashboard → New → Blueprint → selecciona este repo.
+services:
+  - type: web
+    name: davinci-labs
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npm run db:migrate
+    startCommand: npm start
+    healthCheckPath: /login
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Arranca en modo simulado; activá integraciones poniendo MOCK_<SERVICIO>=false
+      - key: MOCK_MODE
+        value: "true"
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: davinci-db
+          property: connectionString
+      # Integraciones (rellenar en el dashboard cuando tengas credenciales):
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REFRESH_TOKEN
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+
+databases:
+  - name: davinci-db
+    plan: free

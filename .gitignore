@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Archivos subidos (documentos/informes) — no versionar
+uploads/
+
+# Archivos generados servibles (no versionar)
+public/reportes/
+public/comprobantes/
+public/crm-media/

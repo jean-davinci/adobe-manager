@@ -1,55 +1,76 @@
 import { chromium, Browser, Page } from 'playwright';
-import { createClient } from '@supabase/supabase-js';
+import { jsPDF } from 'jspdf';
+import { writeFile, mkdir } from 'fs/promises';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { syncToDrive } from '../drive';
+import { esMock } from '../mock';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // necesitas esta key (no la pública)
-);
+// MOCK activo salvo que haya credenciales de las plataformas y se desactive el mock.
+export function isMockScrapers(): boolean {
+  return esMock('MOCK_SCRAPERS', !!process.env.IVERIFICATE_PASSWORD && !!process.env.CANVAS_PASSWORD);
+}
 
-// Sube un buffer PDF a Supabase Storage y devuelve la URL pública
-export async function subirPDFaSupabase(
+// Guarda un PDF en disco (public/reportes/<carpeta>) y lo sincroniza a Drive (mock).
+// Devuelve la URL pública servible.
+export async function guardarPDF(
   buffer: Buffer,
   nombreArchivo: string,
   carpeta: 'iverificate' | 'canvas'
 ): Promise<string> {
-  const filePath = `reportes/${carpeta}/${Date.now()}_${nombreArchivo}`;
+  const dir = path.join(process.cwd(), 'public', 'reportes', carpeta);
+  await mkdir(dir, { recursive: true });
+  const safe = `${Date.now()}_${nombreArchivo.replace(/[^\w.\-]/g, '_')}`;
+  const filePath = path.join(dir, safe);
+  await writeFile(filePath, buffer);
 
-  const { error } = await supabase.storage
-    .from('reportes') // nombre del bucket en Supabase
-    .upload(filePath, buffer, {
-      contentType: 'application/pdf',
-      upsert: true,
-    });
+  // Sincronización a Drive en background (no bloquea).
+  syncToDrive(filePath, `Davinci Labs/Reportes/${carpeta}`).catch((e) =>
+    console.error('syncToDrive (reporte):', e)
+  );
 
-  if (error) throw new Error(`Error subiendo PDF: ${error.message}`);
-
-  const { data } = supabase.storage.from('reportes').getPublicUrl(filePath);
-  return data.publicUrl;
+  return `/reportes/${carpeta}/${safe}`;
 }
 
-// Crea el browser de Playwright
-// headless: false → ves el browser (útil para debug)
-// headless: true  → corre invisible (para producción)
-export async function crearBrowser(headless = false): Promise<Browser> {
-  return await chromium.launch({
-    headless,
-    slowMo: headless ? 0 : 200, // más lento en modo visual para poder seguirlo
-  });
+// Genera un PDF de informe simulado para desarrollo local.
+export function generarPDFMock(opts: {
+  plataforma: string;
+  cliente: string;
+  metrica: string;
+  valor: string;
+}): Buffer {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  doc.setFontSize(20); doc.text('Davinci Labs', 40, 60);
+  doc.setFontSize(14); doc.setTextColor(90);
+  doc.text(`Informe — ${opts.plataforma}`, 40, 86);
+  doc.setDrawColor(220); doc.line(40, 100, 555, 100);
+
+  doc.setTextColor(0); doc.setFontSize(12);
+  doc.text(`Cliente: ${opts.cliente}`, 40, 140);
+  doc.text(`Fecha: ${new Date().toLocaleDateString('es-PE')}`, 40, 162);
+
+  doc.setFontSize(40); doc.setTextColor(37, 99, 235);
+  doc.text(opts.valor, 40, 240);
+  doc.setFontSize(13); doc.setTextColor(90);
+  doc.text(opts.metrica, 40, 266);
+
+  doc.setFontSize(10); doc.setTextColor(150);
+  doc.text('Documento generado en modo MOCK para desarrollo local.', 40, 760);
+  return Buffer.from(doc.output('arraybuffer'));
 }
 
-// Espera a que un selector exista con timeout personalizado
+// ---- Helpers de Playwright (modo real) ----
+export async function crearBrowser(headless = true): Promise<Browser> {
+  return chromium.launch({ headless, slowMo: headless ? 0 : 200 });
+}
+
 export async function esperarElemento(page: Page, selector: string, timeout = 15000) {
   await page.waitForSelector(selector, { timeout });
 }
 
-// Descarga un PDF desde una URL directa o interceptando la descarga
 export async function descargarPDF(page: Page, urlOBoton: string): Promise<Buffer> {
   const tmpPath = path.join(os.tmpdir(), `reporte_${Date.now()}.pdf`);
-
-  // Método 1: URL directa
   if (urlOBoton.startsWith('http') && urlOBoton.includes('.pdf')) {
     const response = await page.evaluate(async (url) => {
       const res = await fetch(url, { credentials: 'include' });
@@ -58,15 +79,12 @@ export async function descargarPDF(page: Page, urlOBoton: string): Promise<Buffe
     }, urlOBoton);
     return Buffer.from(response);
   }
-
-  // Método 2: Interceptar descarga al hacer click en botón
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.click(urlOBoton), // selector del botón de descarga
+    page.click(urlOBoton),
   ]);
-
   await download.saveAs(tmpPath);
   const buffer = fs.readFileSync(tmpPath);
-  fs.unlinkSync(tmpPath); // limpiar archivo temporal
+  fs.unlinkSync(tmpPath);
   return buffer;
 }

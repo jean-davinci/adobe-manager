@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import Sidebar from './components/Sidebar';
+import LayoutShell from './components/LayoutShell';
 
 export const metadata: Metadata = {
   title: 'Davinci · Centro de investigación profesional',
@@ -18,10 +18,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="bg-gray-50 antialiased">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1 min-w-0">{children}</main>
-        </div>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
