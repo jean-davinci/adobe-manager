@@ -60,7 +60,7 @@ export default function Sidebar() {
         className="flex items-center gap-2.5 px-4 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
       >
         <div className="flex-shrink-0 w-7 h-7 relative">
-          <Image src="/logo-icon.png" alt="Davinci" fill className="object-contain" priority />
+          <Image src="/logo-icon.svg" alt="Davinci" fill sizes="28px" className="object-contain" priority />
         </div>
         {!collapsed && (
           <span className="text-[17px] font-semibold text-[#1e3a5f] tracking-tight whitespace-nowrap">

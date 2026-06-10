@@ -1,6 +1,6 @@
-import { crearBrowser, descargarPDF, subirPDFaSupabase } from './scraper-base';
+import { crearBrowser, descargarPDF, guardarPDF, generarPDFMock, isMockScrapers } from './scraper-base';
 
-const URL_LOGIN     = 'https://canvasacademic.com/login';
+const URL_LOGIN = 'https://canvasacademic.com/login';
 const URL_DASHBOARD = 'https://canvasacademic.com/dashboard';
 
 export interface ReporteCanvas {
@@ -11,107 +11,70 @@ export interface ReporteCanvas {
   estado: string;
 }
 
-// Lista los reportes de Turnitin disponibles en Canvas Academic
+// Lista los reportes de similitud (Turnitin vía Canvas Academic).
 export async function listarReportesCanvas(): Promise<ReporteCanvas[]> {
-  const browser = await crearBrowser(false);
-  const page = await browser.newPage();
-  const reportes: ReporteCanvas[] = [];
-
-  try {
-    // 1. LOGIN
-    await page.goto(URL_LOGIN, { waitUntil: 'networkidle' });
-
-    // 🔧 AJUSTAR selectores de login si son distintos
-    await page.fill('input[type="email"], input[name="email"], input[placeholder*="correo"], input[placeholder*="email"]',
-      process.env.CANVAS_EMAIL!
-    );
-    await page.fill('input[type="password"], input[name="password"]',
-      process.env.CANVAS_PASSWORD!
-    );
-    await page.click('button[type="submit"], button:has-text("Iniciar"), button:has-text("Login"), button:has-text("Entrar")');
-    await page.waitForTimeout(3000);
-
-    // 2. IR AL DASHBOARD / REPORTES
-    await page.goto(URL_DASHBOARD, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
-
-    // 🔧 AJUSTAR: Si los reportes están en otra ruta, cámbiala arriba
-    // Busca en el sidebar de Canvas cuál es la sección de reportes/historial
-
-    // 3. EXTRAER LISTA DE REPORTES
-    // 🔧 AJUSTAR selector según lo que veas con F12 en canvasacademic.com/dashboard
-    const filas = await page.$$eval(
-      // Prueba estos selectores en orden hasta que uno funcione:
-      '.report-card, .submission-item, tr.report-row, [class*="reporte"], [class*="historial"] li',
-      (elementos) =>
-        elementos.map((el) => ({
-          id: el.getAttribute('data-id') || el.getAttribute('data-report-id') || el.getAttribute('id') || '',
-          nombre: el.querySelector('[class*="title"], [class*="nombre"], [class*="name"], td:nth-child(1)')?.textContent?.trim() || '',
-          fecha: el.querySelector('[class*="date"], [class*="fecha"], time')?.textContent?.trim() || '',
-          porcentajeSimilitud: el.querySelector('[class*="percent"], [class*="similitud"], [class*="score"]')?.textContent?.trim() || '',
-          estado: el.querySelector('[class*="status"], [class*="estado"]')?.textContent?.trim() || 'Completado',
-        }))
-    );
-
-    reportes.push(...filas);
-
-    if (reportes.length === 0) {
-      await page.screenshot({ path: '/tmp/canvas-debug.png', fullPage: true });
-      console.log('⚠️ No se encontraron reportes. Screenshot guardado en /tmp/canvas-debug.png');
-      console.log('📌 Abre el archivo y ajusta los selectores en listarReportesCanvas()');
-    }
-
-  } finally {
-    await browser.close();
+  if (isMockScrapers()) {
+    const min = (m: number) => new Date(Date.now() - m * 60000).toLocaleString('es-PE');
+    return [
+      { id: 'cv-2001', nombre: 'tesis_capitulo1.docx', fecha: min(30), estado: 'Completado', porcentajeSimilitud: '8%' },
+      { id: 'cv-2002', nombre: 'marco_teorico.docx', fecha: min(120), estado: 'Completado', porcentajeSimilitud: '21%' },
+    ];
   }
 
-  return reportes;
-}
-
-// Descarga el PDF de un reporte específico
-export async function descargarReporteCanvas(
-  reporteId: string,
-  nombreCliente: string
-): Promise<string> {
-  const browser = await crearBrowser(false);
+  const browser = await crearBrowser(true);
   const page = await browser.newPage();
-
+  const reportes: ReporteCanvas[] = [];
   try {
-    // Login
     await page.goto(URL_LOGIN, { waitUntil: 'networkidle' });
-    await page.fill('input[type="email"], input[name="email"], input[placeholder*="correo"]',
-      process.env.CANVAS_EMAIL!
-    );
+    await page.fill('input[type="email"], input[name="email"], input[placeholder*="correo"]', process.env.CANVAS_EMAIL!);
     await page.fill('input[type="password"]', process.env.CANVAS_PASSWORD!);
     await page.click('button[type="submit"], button:has-text("Iniciar"), button:has-text("Login")');
     await page.waitForTimeout(3000);
-
     await page.goto(URL_DASHBOARD, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
+    const filas = await page.$$eval(
+      '.report-card, .submission-item, tr.report-row, [class*="reporte"], [class*="historial"] li',
+      (els) => els.map((el) => ({
+        id: el.getAttribute('data-id') || el.getAttribute('data-report-id') || el.getAttribute('id') || '',
+        nombre: el.querySelector('[class*="title"], [class*="nombre"], td:nth-child(1)')?.textContent?.trim() || '',
+        fecha: el.querySelector('[class*="date"], [class*="fecha"], time')?.textContent?.trim() || '',
+        porcentajeSimilitud: el.querySelector('[class*="percent"], [class*="similitud"]')?.textContent?.trim() || '',
+        estado: el.querySelector('[class*="status"], [class*="estado"]')?.textContent?.trim() || 'Completado',
+      }))
+    );
+    reportes.push(...filas);
+  } finally {
+    await browser.close();
+  }
+  return reportes;
+}
 
-    // 🔧 AJUSTAR: Navegar al reporte específico
-    // Opción A: Click en el elemento por su ID
-    await page.click(`[data-id="${reporteId}"], [data-report-id="${reporteId}"]`).catch(async () => {
-      // Opción B: Click en el texto del nombre
-      await page.click(`text="${reporteId}"`);
-    });
+// Descarga el PDF del reporte y lo guarda (local + Drive). Devuelve la URL.
+export async function descargarReporteCanvas(reporteId: string, nombreCliente: string): Promise<string> {
+  const nombreArchivo = `reporte-turnitin-${nombreCliente.replace(/\s+/g, '-')}.pdf`;
 
+  if (isMockScrapers()) {
+    const valor = reporteId === 'cv-2002' ? '21%' : '8%';
+    const pdf = generarPDFMock({ plataforma: 'Turnitin / Canvas (Similitud)', cliente: nombreCliente, metrica: 'Índice de similitud', valor });
+    return guardarPDF(pdf, nombreArchivo, 'canvas');
+  }
+
+  const browser = await crearBrowser(true);
+  const page = await browser.newPage();
+  try {
+    await page.goto(URL_LOGIN, { waitUntil: 'networkidle' });
+    await page.fill('input[type="email"], input[name="email"], input[placeholder*="correo"]', process.env.CANVAS_EMAIL!);
+    await page.fill('input[type="password"]', process.env.CANVAS_PASSWORD!);
+    await page.click('button[type="submit"], button:has-text("Iniciar"), button:has-text("Login")');
+    await page.waitForTimeout(3000);
+    await page.goto(URL_DASHBOARD, { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
-
-    // 🔧 AJUSTAR: Selector del botón de descarga del PDF
-    const selectorDescarga =
-      'a[href*=".pdf"], a[href*="/download"], button:has-text("Descargar"), button:has-text("PDF"), a:has-text("Descargar reporte")';
-
-    const pdfUrl = await page.$eval(selectorDescarga, (el) =>
-      (el as HTMLAnchorElement).href || ''
-    ).catch(() => '');
-
+    await page.click(`[data-id="${reporteId}"], [data-report-id="${reporteId}"]`).catch(() => page.click(`text="${reporteId}"`));
+    await page.waitForTimeout(2000);
+    const selectorDescarga = 'a[href*=".pdf"], a[href*="/download"], button:has-text("Descargar"), button:has-text("PDF")';
+    const pdfUrl = await page.$eval(selectorDescarga, (el) => (el as HTMLAnchorElement).href || '').catch(() => '');
     const buffer = await descargarPDF(page, pdfUrl || selectorDescarga);
-    const nombreArchivo = `reporte-turnitin-${nombreCliente.replace(/\s+/g, '-')}.pdf`;
-    const urlPublica = await subirPDFaSupabase(buffer, nombreArchivo, 'canvas');
-
-    return urlPublica;
-
+    return guardarPDF(buffer, nombreArchivo, 'canvas');
   } finally {
     await browser.close();
   }
