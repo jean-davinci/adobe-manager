@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { requireApi } from '@/lib/api-auth';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const { tipo, cliente } = await req.json();
 

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listarProyectos, crearProyecto } from '@/lib/proyectos';
+import { requireApi } from '@/lib/api-auth';
 
 export async function GET() {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const data = await listarProyectos();
     return NextResponse.json(data);
@@ -11,6 +15,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const body = await req.json();
     const data = await crearProyecto({

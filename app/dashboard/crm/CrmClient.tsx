@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 
 type ResumenCliente = { ingresos: number; egresos: number; total: number; ultimas: { id: string; tipo: string; monto: number; fecha: string; categoria: string }[] };
 const soles = (n: number) => 'S/. ' + Number(n).toLocaleString('es-PE', { minimumFractionDigits: 2 });
@@ -19,13 +19,16 @@ type Respuesta = { id: string; trigger: string; texto: string };
 const ETIQUETAS_DISP = ['Nuevo', 'En proceso', 'Pagado', 'Turnitin', 'Afiliado', 'VIP'];
 const colorTag = (t: string) => {
   const m: Record<string, string> = {
-    Nuevo: 'bg-blue-100 text-blue-700', 'En proceso': 'bg-yellow-100 text-yellow-700',
-    Pagado: 'bg-green-100 text-green-700', Turnitin: 'bg-purple-100 text-purple-700',
-    Afiliado: 'bg-indigo-100 text-indigo-700', VIP: 'bg-pink-100 text-pink-700',
+    Nuevo: 'dv-badge-brand', 'En proceso': 'dv-badge-warning',
+    Pagado: 'dv-badge-success', Turnitin: 'dv-badge-accent',
+    Afiliado: 'dv-badge-brand', VIP: 'dv-badge-accent',
   };
-  return m[t] ?? 'bg-gray-100 text-gray-600';
+  return m[t] ?? 'dv-badge-muted';
 };
 const hora = (s: string) => new Date(s).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+
+const iniciales = (nombre: string) =>
+  nombre.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase();
 
 export default function CrmClient() {
   const [contactos, setContactos] = useState<Contacto[]>([]);
@@ -33,6 +36,7 @@ export default function CrmClient() {
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [respuestas, setRespuestas] = useState<Respuesta[]>([]);
   const [texto, setTexto] = useState('');
+  const [busqueda, setBusqueda] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [mostrarRapidas, setMostrarRapidas] = useState(false);
   const [finanzas, setFinanzas] = useState<ResumenCliente | null>(null);
@@ -128,63 +132,112 @@ export default function CrmClient() {
   };
 
   const rapidasFiltradas = respuestas.filter((r) => r.trigger.startsWith(texto.split(' ')[0]));
+  const contactosFiltrados = useMemo(() => {
+    const q = busqueda.trim().toLowerCase();
+    if (!q) return contactos;
+    return contactos.filter((c) =>
+      c.nombre.toLowerCase().includes(q) || c.telefono.includes(q) || (c.email ?? '').toLowerCase().includes(q)
+    );
+  }, [contactos, busqueda]);
 
   return (
     <div className="h-full flex">
       {/* Lista de contactos */}
-      <aside className="w-72 border-r border-gray-100 bg-white flex flex-col shrink-0">
-        <div className="p-3 border-b border-gray-100">
-          <input placeholder="Buscar..." className="w-full bg-gray-100 rounded-lg px-3 py-1.5 text-sm focus:outline-none" />
+      <aside className="w-72 border-r flex flex-col shrink-0" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+        <div className="p-3 border-b" style={{ borderColor: 'var(--border)' }}>
+          <input
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Buscar contacto…"
+            className="dv-input !rounded-lg !py-1.5"
+          />
         </div>
         <div className="flex-1 overflow-y-auto">
-          {contactos.map((c) => (
+          {contactosFiltrados.map((c, i) => (
             <button key={c.id} onClick={() => abrir(c)}
-              className={`w-full text-left px-3 py-3 border-b border-gray-50 hover:bg-gray-50 ${activo?.id === c.id ? 'bg-gray-50' : ''}`}>
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-sm text-gray-900 truncate">{c.nombre}</span>
-                {c.no_leidos > 0 && (
-                  <span className="ml-2 shrink-0 bg-green-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5">{c.no_leidos}</span>
-                )}
+              className={`w-full text-left px-3 py-3 border-b transition-colors dv-animate-in`}
+              style={{
+                borderColor: 'var(--border)',
+                background: activo?.id === c.id ? 'var(--brand-soft)' : undefined,
+                animationDelay: `${Math.min(i * 25, 250)}ms`,
+              }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+                  style={{ background: 'var(--brand)', color: 'var(--accent)' }}>
+                  {iniciales(c.nombre)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>{c.nombre}</span>
+                    {c.no_leidos > 0 && (
+                      <span className="ml-2 shrink-0 text-[10px] font-bold rounded-full px-1.5 py-0.5 text-white" style={{ background: 'var(--success)' }}>
+                        {c.no_leidos}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>{c.ultimo_mensaje ?? c.telefono}</p>
+                </div>
               </div>
-              <p className="text-xs text-gray-400 truncate mt-0.5">{c.ultimo_mensaje ?? c.telefono}</p>
-              <div className="flex gap-1 mt-1 flex-wrap">
-                {c.etiquetas.slice(0, 3).map((t) => (
-                  <span key={t} className={`text-[10px] px-1.5 py-0.5 rounded-full ${colorTag(t)}`}>{t}</span>
-                ))}
-              </div>
+              {c.etiquetas.length > 0 && (
+                <div className="flex gap-1 mt-1.5 flex-wrap pl-[46px]">
+                  {c.etiquetas.slice(0, 3).map((t) => (
+                    <span key={t} className={`dv-badge ${colorTag(t)} !text-[10px] !px-1.5`}>{t}</span>
+                  ))}
+                </div>
+              )}
             </button>
           ))}
-          {contactos.length === 0 && <p className="p-4 text-sm text-gray-400 text-center">Sin contactos</p>}
+          {contactosFiltrados.length === 0 && (
+            <p className="p-4 text-sm text-center" style={{ color: 'var(--text-muted)' }}>
+              {busqueda ? 'Sin resultados' : 'Sin contactos'}
+            </p>
+          )}
         </div>
       </aside>
 
       {/* Conversación */}
-      <section className="flex-1 flex flex-col min-w-0 bg-gray-50">
+      <section className="flex-1 flex flex-col min-w-0" style={{ background: 'var(--background)' }}>
         {!activo ? (
-          <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
-            Selecciona una conversación
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 dv-animate-in">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'var(--brand-soft)', color: 'var(--brand)' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" />
+              </svg>
+            </div>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Selecciona una conversación para empezar</p>
           </div>
         ) : (
           <>
-            <div className="bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between shrink-0">
-              <div>
-                <h2 className="font-semibold text-sm text-gray-900">{activo.nombre}</h2>
-                <p className="text-xs text-gray-400">{activo.telefono}</p>
+            <div className="border-b px-5 py-3 flex items-center justify-between shrink-0" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold"
+                  style={{ background: 'var(--brand)', color: 'var(--accent)' }}>
+                  {iniciales(activo.nombre)}
+                </div>
+                <div>
+                  <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{activo.nombre}</h2>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{activo.telefono}</p>
+                </div>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 space-y-2">
               {mensajes.map((m) => (
-                <div key={m.id} className={`flex ${m.origen === 'CLIENTE' ? 'justify-start' : 'justify-end'}`}>
-                  <div className={`max-w-[70%] rounded-2xl px-3.5 py-2 text-sm ${
-                    m.origen === 'CLIENTE' ? 'bg-white border border-gray-100 text-gray-800'
-                      : m.origen === 'AUTO' ? 'bg-gray-200 text-gray-600' : 'bg-green-500 text-white'}`}>
+                <div key={m.id} className={`flex dv-animate-in ${m.origen === 'CLIENTE' ? 'justify-start' : 'justify-end'}`}>
+                  <div className="max-w-[70%] rounded-2xl px-3.5 py-2 text-sm"
+                    style={
+                      m.origen === 'CLIENTE'
+                        ? { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }
+                        : m.origen === 'AUTO'
+                          ? { background: 'var(--accent-soft)', border: '1px solid var(--accent)', color: 'var(--text-secondary)' }
+                          : { background: 'var(--brand)', color: 'white' }
+                    }>
                     {m.media_url && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={m.media_url} alt="adjunto" className="rounded-lg mb-1 max-w-full max-h-48 object-cover" />
                     )}
                     <p className="whitespace-pre-wrap">{m.contenido}</p>
-                    <p className={`text-[10px] mt-1 ${m.origen === 'CLIENTE' ? 'text-gray-400' : 'text-white/70'}`}>
+                    <p className="text-[10px] mt-1" style={{ color: m.origen === 'OPERADOR' ? 'rgba(255,255,255,0.6)' : 'var(--text-muted)' }}>
                       {m.origen === 'AUTO' && '🤖 '}{hora(m.timestamp)}
                     </p>
                   </div>
@@ -194,14 +247,15 @@ export default function CrmClient() {
             </div>
 
             {/* Caja de envío */}
-            <div className="bg-white border-t border-gray-100 p-3 shrink-0 relative">
+            <div className="border-t p-3 shrink-0 relative" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
               {mostrarRapidas && rapidasFiltradas.length > 0 && (
-                <div className="absolute bottom-full left-3 right-3 mb-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                <div className="absolute bottom-full left-3 right-3 mb-1 dv-card shadow-lg overflow-hidden dv-animate-scale">
                   {rapidasFiltradas.map((r) => (
                     <button key={r.id} onClick={() => aplicarRapida(r)}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0">
-                      <span className="text-xs font-semibold text-green-600">{r.trigger}</span>
-                      <p className="text-xs text-gray-500 truncate">{r.texto}</p>
+                      className="w-full text-left px-3 py-2 border-b last:border-0 transition-colors hover:bg-[var(--surface-muted)]"
+                      style={{ borderColor: 'var(--border)' }}>
+                      <span className="text-xs font-semibold" style={{ color: 'var(--accent-hover)' }}>{r.trigger}</span>
+                      <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{r.texto}</p>
                     </button>
                   ))}
                 </div>
@@ -210,13 +264,14 @@ export default function CrmClient() {
                 <input ref={imgRef} type="file" accept="image/*" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) enviarImagen(f); e.target.value = ''; }} />
                 <button onClick={() => imgRef.current?.click()} title="Adjuntar imagen"
-                  className="px-3 py-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50">📎</button>
+                  className="px-3 py-2 border rounded-xl transition-colors hover:bg-[var(--surface-muted)]"
+                  style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>📎</button>
                 <textarea value={texto} onChange={(e) => onTextoChange(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); } }}
                   placeholder="Escribe un mensaje… ( / para respuestas rápidas )" rows={1}
-                  className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                  className="dv-input flex-1 resize-none !rounded-xl" />
                 <button onClick={enviar} disabled={enviando || !texto.trim()}
-                  className="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-medium hover:bg-green-600 disabled:bg-gray-300">
+                  className="dv-btn-primary !rounded-xl disabled:opacity-40">
                   Enviar
                 </button>
               </div>
@@ -227,52 +282,59 @@ export default function CrmClient() {
 
       {/* Panel derecho: detalles del contacto */}
       {activo && (
-        <aside className="w-64 border-l border-gray-100 bg-white p-4 overflow-y-auto shrink-0">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Etiquetas</h3>
+        <aside className="w-64 border-l p-4 overflow-y-auto shrink-0 dv-animate-panel" style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}>
+          <h3 className="dv-eyebrow mb-2">Etiquetas</h3>
           <div className="flex flex-wrap gap-1.5 mb-5">
             {ETIQUETAS_DISP.map((t) => {
               const on = activo.etiquetas.includes(t);
               return (
                 <button key={t} onClick={() => toggleEtiqueta(t)}
-                  className={`text-xs px-2 py-1 rounded-full border ${on ? colorTag(t) + ' border-transparent' : 'border-gray-200 text-gray-400'}`}>
+                  className={`text-xs px-2 py-1 rounded-full border transition-all ${on ? colorTag(t) + ' border-transparent' : ''}`}
+                  style={!on ? { borderColor: 'var(--border)', color: 'var(--text-muted)' } : undefined}>
                   {t}
                 </button>
               );
             })}
           </div>
 
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Datos</h3>
-          <div className="text-sm text-gray-600 space-y-1 mb-5">
+          <h3 className="dv-eyebrow mb-2">Datos</h3>
+          <div className="text-sm space-y-1 mb-5" style={{ color: 'var(--text-secondary)' }}>
             <p>📧 {activo.email ?? '—'}</p>
             <p>📱 {activo.telefono}</p>
           </div>
 
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">💰 Resumen financiero</h3>
+          <h3 className="dv-eyebrow mb-2">Resumen financiero</h3>
           {finanzas ? (
-            <div className="mb-5 rounded-xl border border-gray-100 p-3 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Ingresos</span><span className="text-green-600 font-medium">{soles(finanzas.ingresos)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Egresos</span><span className="text-red-500 font-medium">{soles(finanzas.egresos)}</span></div>
-              <div className="flex justify-between border-t border-gray-100 mt-1 pt-1"><span className="text-gray-600">Neto</span><span className="font-semibold">{soles(finanzas.ingresos - finanzas.egresos)}</span></div>
+            <div className="mb-5 dv-card-muted p-3 text-sm dv-animate-in">
+              <div className="flex justify-between"><span style={{ color: 'var(--text-secondary)' }}>Ingresos</span><span className="font-medium" style={{ color: 'var(--success)' }}>{soles(finanzas.ingresos)}</span></div>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-secondary)' }}>Egresos</span><span className="font-medium" style={{ color: 'var(--danger)' }}>{soles(finanzas.egresos)}</span></div>
+              <div className="flex justify-between border-t mt-1 pt-1" style={{ borderColor: 'var(--border)' }}>
+                <span style={{ color: 'var(--text-primary)' }}>Neto</span>
+                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>{soles(finanzas.ingresos - finanzas.egresos)}</span>
+              </div>
               {finanzas.ultimas.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-gray-100 space-y-0.5">
+                <div className="mt-2 pt-2 border-t space-y-0.5" style={{ borderColor: 'var(--border)' }}>
                   {finanzas.ultimas.slice(0, 3).map((u) => (
                     <div key={u.id} className="flex justify-between text-xs">
-                      <span className="text-gray-400 truncate">{u.fecha} · {u.categoria}</span>
-                      <span className={u.tipo === 'INGRESO' ? 'text-green-600' : 'text-red-500'}>{soles(u.monto)}</span>
+                      <span className="truncate" style={{ color: 'var(--text-muted)' }}>{u.fecha} · {u.categoria}</span>
+                      <span style={{ color: u.tipo === 'INGRESO' ? 'var(--success)' : 'var(--danger)' }}>{soles(u.monto)}</span>
                     </div>
                   ))}
                 </div>
               )}
-              <a href="/dashboard/finanzas" className="block mt-2 text-xs text-blue-500 hover:underline">Ver en Finanzas →</a>
+              <a href="/dashboard/finanzas" className="block mt-2 text-xs hover:underline font-medium" style={{ color: 'var(--accent-hover)' }}>Ver en Finanzas →</a>
             </div>
           ) : (
-            <p className="text-xs text-gray-300 mb-5">Cargando…</p>
+            <div className="mb-5 space-y-2">
+              <div className="dv-skeleton h-4 w-full" />
+              <div className="dv-skeleton h-4 w-2/3" />
+            </div>
           )}
 
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Notas internas</h3>
+          <h3 className="dv-eyebrow mb-2">Notas internas</h3>
           <textarea defaultValue={activo.notas ?? ''} onBlur={(e) => guardarNotas(e.target.value)}
             placeholder="No visible para el cliente…" rows={4}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            className="dv-input resize-none" />
         </aside>
       )}
     </div>

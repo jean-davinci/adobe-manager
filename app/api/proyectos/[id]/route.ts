@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { actualizarProyecto, eliminarProyecto } from '@/lib/proyectos';
+import { requireApi } from '@/lib/api-auth';
 
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -13,6 +17,9 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 }
 
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const { id } = await context.params;
     await eliminarProyecto(id);

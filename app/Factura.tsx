@@ -102,34 +102,34 @@ export default function Factura({ cliente, onClose }: { cliente: any; onClose: (
 
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">🧾 Comprobante de Pago</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl">✕</button>
+          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-white text-xl">✕</button>
         </div>
 
         {/* Preview */}
         <div className="bg-gray-800 rounded-xl p-4 mb-4 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-400">N° Comprobante:</span>
+            <span className="text-[var(--text-muted)]">N° Comprobante:</span>
             <span className="font-mono text-blue-400">{numeroFactura}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-400">Cliente:</span>
+            <span className="text-[var(--text-muted)]">Cliente:</span>
             <span className="text-white">{cliente.nombre_cliente}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-400">Email:</span>
+            <span className="text-[var(--text-muted)]">Email:</span>
             <span className="text-white text-xs">{cliente.email_cliente}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-400">Plan:</span>
+            <span className="text-[var(--text-muted)]">Plan:</span>
             <span className="text-white">{cliente.plan_duracion} mes(es)</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-400">Válido hasta:</span>
+            <span className="text-[var(--text-muted)]">Válido hasta:</span>
             <span className="text-white">{fechaVence}</span>
           </div>
           <hr className="border-gray-600" />
           <div className="flex justify-between font-bold text-base">
-            <span className="text-gray-300">TOTAL:</span>
+            <span className="text-[var(--text-muted)]">TOTAL:</span>
             <span className="text-green-400">S/. {Number(cliente.costo_servicio).toFixed(2)}</span>
           </div>
         </div>

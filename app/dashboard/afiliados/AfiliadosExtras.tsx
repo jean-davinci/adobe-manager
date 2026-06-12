@@ -36,46 +36,58 @@ export default function AfiliadosExtras() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 pt-6">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap dv-animate-up">
         <button onClick={toggleGmail}
-          className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-100 bg-white">
+          className="px-3 py-1.5 text-sm border rounded-lg transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-hover)]"
+          style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--surface)' }}>
           📬 Bandeja Gmail {abierto ? '▲' : '▼'}
         </button>
         <button onClick={notificar}
-          className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-100 bg-white">
+          className="px-3 py-1.5 text-sm border rounded-lg transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-hover)]"
+          style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--surface)' }}>
           🔔 Notificar vencimientos
         </button>
-        {notif && <span className="text-xs text-green-600 font-medium">{notif}</span>}
+        {notif && <span className="text-xs font-medium dv-animate-in" style={{ color: 'var(--success)' }}>{notif}</span>}
       </div>
 
       {abierto && (
-        <div className="mt-3 bg-white rounded-2xl border border-gray-100 p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-3 dv-card p-4 grid grid-cols-1 md:grid-cols-2 gap-4 dv-animate-scale">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">
-              🔑 Códigos de acceso {gmail?.mock && <span className="text-xs text-amber-500 font-normal">(mock)</span>}
+            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+              🔑 Códigos de acceso {gmail?.mock && <span className="dv-badge dv-badge-warning ml-1">mock</span>}
             </h3>
-            {cargando ? <p className="text-xs text-gray-400">Cargando…</p> : (
+            {cargando ? (
+              <div className="space-y-2">
+                <div className="dv-skeleton h-12 w-full" />
+                <div className="dv-skeleton h-12 w-full" />
+              </div>
+            ) : (
               <div className="space-y-2">
                 {gmail?.codigos.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg p-2.5">
+                  <div key={i} className="flex items-center justify-between dv-card-muted p-2.5">
                     <div className="min-w-0">
-                      <p className="text-xs text-gray-500 truncate">{c.subject}</p>
-                      <p className="text-[11px] text-gray-400">{hora(c.date)}</p>
+                      <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{c.subject}</p>
+                      <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{hora(c.date)}</p>
                     </div>
-                    {c.code && <span className="font-mono font-bold text-blue-600 text-lg ml-2">{c.code}</span>}
+                    {c.code && <span className="font-mono font-bold text-lg ml-2" style={{ color: 'var(--accent-hover)' }}>{c.code}</span>}
                   </div>
                 ))}
               </div>
             )}
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">🤖 Informes de IA recibidos</h3>
-            {cargando ? <p className="text-xs text-gray-400">Cargando…</p> : (
+            <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🤖 Informes de IA recibidos</h3>
+            {cargando ? (
+              <div className="space-y-2">
+                <div className="dv-skeleton h-12 w-full" />
+                <div className="dv-skeleton h-12 w-full" />
+              </div>
+            ) : (
               <div className="space-y-2">
                 {gmail?.informes.map((inf, i) => (
-                  <div key={i} className="bg-gray-50 rounded-lg p-2.5">
-                    <p className="text-xs font-medium text-gray-700 truncate">{inf.subject}</p>
-                    <p className="text-[11px] text-gray-400">{inf.cliente} · 📎 {inf.adjunto} · {hora(inf.date)}</p>
+                  <div key={i} className="dv-card-muted p-2.5">
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-secondary)' }}>{inf.subject}</p>
+                    <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{inf.cliente} · 📎 {inf.adjunto} · {hora(inf.date)}</p>
                   </div>
                 ))}
               </div>

@@ -20,6 +20,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Falta archivo o nombre del cliente' }, { status: 400 });
     }
 
+    // Validación del archivo: extensión permitida y tamaño máximo (25 MB).
+    const EXT_OK = ['.pdf', '.doc', '.docx'];
+    const MAX_BYTES = 25 * 1024 * 1024;
+    if (!EXT_OK.some((e) => file.name.toLowerCase().endsWith(e))) {
+      return NextResponse.json({ error: 'Tipo de archivo no permitido (.pdf, .doc, .docx)' }, { status: 400 });
+    }
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json({ error: 'El archivo supera el límite de 25 MB' }, { status: 413 });
+    }
+
     // Carpeta local: uploads/YYYY-MM-DD/
     const hoy = new Date().toISOString().split('T')[0];
     const dir = path.join(process.cwd(), 'uploads', hoy);

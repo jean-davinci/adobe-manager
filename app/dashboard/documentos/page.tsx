@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { requireRole } from '@/lib/dal';
-import LogoutButton from '@/app/components/LogoutButton';
+import ModuleHeader from '@/app/components/ModuleHeader';
 import DocumentosClient from './DocumentosClient';
 
 export const metadata = { title: 'Turnitin / Documentos — Davinci Labs' };
@@ -9,19 +8,18 @@ export default async function DocumentosPage() {
   await requireRole('ADMIN', 'OPERATOR');
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-gray-400 hover:text-gray-700 text-sm">← Panel</Link>
-            <div className="h-4 w-px bg-gray-200" />
-            <h1 className="text-base font-semibold text-gray-900">📄 Turnitin / Documentos</h1>
-          </div>
-          <LogoutButton />
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-6 py-8">
+    <main className="min-h-screen" style={{ background: 'var(--background)' }}>
+      <ModuleHeader
+        eyebrow="Turnitin"
+        titulo="Procesamiento de documentos"
+        descripcion="Recepción, detección IA, similitud e informes finales"
+        icono={
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h4" />
+          </svg>
+        }
+      />
+      <div className="max-w-7xl mx-auto px-6 py-8">
         <DocumentosClient />
       </div>
     </main>

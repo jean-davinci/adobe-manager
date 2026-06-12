@@ -25,13 +25,19 @@ export default function TablaClientes({ refresh, onSeleccionar }: { refresh: num
   });
 
   if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
+    <div className="dv-card p-4 space-y-3">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex items-center gap-4">
+          <div className="dv-skeleton h-9 w-16" />
+          <div className="dv-skeleton h-9 w-1/3" />
+          <div className="dv-skeleton h-9 flex-1" />
+        </div>
+      ))}
     </div>
   );
 
   return (
-    <div>
+    <div className="dv-animate-up dv-delay-2">
       {/* Filtros */}
       <div className="flex gap-2 mb-4">
         {[
@@ -41,15 +47,13 @@ export default function TablaClientes({ refresh, onSeleccionar }: { refresh: num
         ].map(f => (
           <button key={f.key}
             onClick={() => setFiltro(f.key as any)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              filtro === f.key
-                ? 'bg-gray-900 text-white'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            }`}>
+            className="px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+            style={filtro === f.key
+              ? { background: 'var(--brand)', color: 'white' }
+              : { background: 'var(--brand-soft)', color: 'var(--text-secondary)' }}>
             {f.label}
-            <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
-              filtro === f.key ? 'bg-white/20' : 'bg-gray-200'
-            }`}>
+            <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full"
+              style={filtro === f.key ? { background: 'rgba(255,255,255,0.2)' } : { background: 'var(--surface)' }}>
               {f.key === 'activos' ? clientes.filter(c => c.estado === 'ACTIVO').length :
                f.key === 'inactivos' ? clientes.filter(c => ["INACTIVO","CANCELADO"].includes(c.estado)).length :
                clientes.length}
@@ -59,89 +63,79 @@ export default function TablaClientes({ refresh, onSeleccionar }: { refresh: num
       </div>
 
       {clientesFiltrados.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 text-sm">
+        <div className="dv-card text-center py-16 text-sm" style={{ color: 'var(--text-muted)' }}>
           {filtro === 'inactivos' ? 'No hay clientes inactivos' : 'No hay clientes aún'}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-          <table className="w-full">
+        <div className="dv-card overflow-hidden">
+          <table className="dv-table">
             <thead>
-              <tr className="border-b border-gray-50">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">#</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Cliente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Teléfono</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Plan</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Costo</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Vence</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Plan</th>
+                <th style={{ textAlign: 'right' }}>Costo</th>
+                <th>Vence</th>
+                <th style={{ textAlign: 'center' }}>Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody>
               {clientesFiltrados.map((c) => {
                 const dias = calcularDias(c.fecha_renovacion_proxima);
                 const esInactivo = ['INACTIVO', 'CANCELADO'].includes(c.estado); // eslint-disable-line
                 return (
                   <tr key={c.id}
                     onClick={() => onSeleccionar(c)}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer group">
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-xs text-blue-500 font-medium">{c.numero_pedido}</span>
+                    className="cursor-pointer">
+                    <td>
+                      <span className="font-mono text-xs font-semibold" style={{ color: 'var(--accent-hover)' }}>{c.numero_pedido}</span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className={`font-medium text-sm ${esInactivo ? 'text-gray-400' : 'text-gray-900'}`}>
+                    <td>
+                      <div className="font-medium text-sm" style={{ color: esInactivo ? 'var(--text-muted)' : 'var(--text-primary)' }}>
                         {c.nombre_cliente}
                       </div>
-                      <div className="text-xs text-gray-400 mt-0.5">{c.email_cliente}</div>
+                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{c.email_cliente}</div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{c.telefono}</td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                    <td className="text-sm" style={{ color: 'var(--text-secondary)' }}>{c.telefono}</td>
+                    <td>
+                      <span className="dv-badge dv-badge-brand">
                         {c.plan_duracion === 12 ? '12 meses' : `${c.plan_duracion} mes`}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-sm font-semibold text-gray-900">S/. {Number(c.costo_servicio).toFixed(2)}</span>
+                    <td style={{ textAlign: 'right' }}>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>S/. {Number(c.costo_servicio).toFixed(2)}</span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td>
                       {esInactivo ? (
-                        <span className="text-xs text-gray-400">—</span>
+                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>—</span>
                       ) : (
                         <div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                             {new Date(c.fecha_renovacion_proxima).toLocaleDateString('es-PE')}
                           </div>
-                          <div className={`text-xs font-medium mt-0.5 ${
-                            dias <= 0 ? 'text-red-500' :
-                            dias <= 5 ? 'text-orange-500' :
-                            dias <= 15 ? 'text-yellow-600' :
-                            'text-green-500'
-                          }`}>
+                          <div className="text-xs font-medium mt-0.5" style={{
+                            color: dias <= 0 ? 'var(--danger)' :
+                                   dias <= 5 ? 'var(--warning)' :
+                                   dias <= 15 ? 'var(--accent-hover)' :
+                                   'var(--success)',
+                          }}>
                             {dias <= 0 ? 'Vencido' : `${dias}d restantes`}
                           </div>
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td style={{ textAlign: 'center' }}>
                       {esInactivo ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
-                          Inactivo
-                        </span>
+                        <span className="dv-badge dv-badge-muted">Inactivo</span>
                       ) : dias <= 0 ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600">
-                          Vencido
-                        </span>
+                        <span className="dv-badge dv-badge-danger">Vencido</span>
                       ) : dias <= 5 ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600">
-                          Urgente
-                        </span>
+                        <span className="dv-badge dv-badge-warning">Urgente</span>
                       ) : dias <= 15 ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
-                          Por vencer
-                        </span>
+                        <span className="dv-badge dv-badge-accent">Por vencer</span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-600">
-                          Activo
-                        </span>
+                        <span className="dv-badge dv-badge-success">Activo</span>
                       )}
                     </td>
                   </tr>

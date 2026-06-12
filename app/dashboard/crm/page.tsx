@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import { requireRole } from '@/lib/dal';
-import LogoutButton from '@/app/components/LogoutButton';
+import ModuleHeader from '@/app/components/ModuleHeader';
 import CrmClient from './CrmClient';
 
 export const metadata = { title: 'CRM WhatsApp — Davinci Labs' };
@@ -9,17 +8,19 @@ export default async function CrmPage() {
   await requireRole('ADMIN', 'OPERATOR');
 
   return (
-    <main className="h-screen flex flex-col bg-gray-50">
-      <header className="bg-white border-b border-gray-100 shrink-0">
-        <div className="px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-gray-400 hover:text-gray-700 text-sm">← Panel</Link>
-            <div className="h-4 w-px bg-gray-200" />
-            <h1 className="text-base font-semibold text-gray-900">💬 CRM WhatsApp</h1>
-          </div>
-          <LogoutButton />
-        </div>
-      </header>
+    <main className="h-screen flex flex-col" style={{ background: 'var(--background)' }}>
+      <div className="shrink-0">
+        <ModuleHeader
+          eyebrow="CRM"
+          titulo="Conversaciones WhatsApp"
+          descripcion="Contactos, etiquetas, respuestas rápidas y notas internas"
+          icono={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z" />
+            </svg>
+          }
+        />
+      </div>
       <div className="flex-1 min-h-0">
         <CrmClient />
       </div>

@@ -21,18 +21,18 @@ interface Servicio {
 }
 
 const TIPOS = {
-  TURNITIN:       { label: 'Informe Turnitin',  color: 'bg-blue-100 text-blue-700',    emoji: '📄', monto: 12   },
-  IA_REDUCCION:   { label: 'Reducción IA',       color: 'bg-purple-100 text-purple-700', emoji: '🤖', monto: 20   },
-  ASESORIA:       { label: 'Asesoría de Tesis',  color: 'bg-green-100 text-green-700',  emoji: '📚', monto: 350  },
-  TESIS_COMPLETA: { label: 'Tesis Completa',     color: 'bg-orange-100 text-orange-700',emoji: '🎓', monto: 3400 },
+  TURNITIN:       { label: 'Informe Turnitin',  color: 'bg-blue-50 text-blue-700',    emoji: '📄', monto: 12   },
+  IA_REDUCCION:   { label: 'Reducción IA',       color: 'bg-indigo-50 text-indigo-700', emoji: '🤖', monto: 20   },
+  ASESORIA:       { label: 'Asesoría de Tesis',  color: 'bg-emerald-50 text-emerald-700',  emoji: '📚', monto: 350  },
+  TESIS_COMPLETA: { label: 'Tesis Completa',     color: 'bg-orange-50 text-orange-700',emoji: '🎓', monto: 3400 },
 };
 
 const ESTADOS = {
-  PENDIENTE:  { label: 'Pendiente',   color: 'bg-yellow-100 text-yellow-700' },
-  EN_PROCESO: { label: 'En proceso',  color: 'bg-blue-100 text-blue-700'    },
-  REVISION:   { label: 'En revisión', color: 'bg-purple-100 text-purple-700' },
-  COMPLETADO: { label: 'Completado',  color: 'bg-green-100 text-green-700'  },
-  CANCELADO:  { label: 'Cancelado',   color: 'bg-red-100 text-red-700'      },
+  PENDIENTE:  { label: 'Pendiente',   color: 'bg-amber-50 text-amber-700' },
+  EN_PROCESO: { label: 'En proceso',  color: 'bg-blue-50 text-blue-700'    },
+  REVISION:   { label: 'En revisión', color: 'bg-indigo-50 text-indigo-700' },
+  COMPLETADO: { label: 'Completado',  color: 'bg-emerald-50 text-emerald-700'  },
+  CANCELADO:  { label: 'Cancelado',   color: 'bg-red-50 text-red-700'      },
 };
 
 const FORM_VACIO = {
@@ -106,21 +106,29 @@ export default function ServiciosPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen" style={{ background: 'var(--background)' }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-            <a href="/" className="hover:text-gray-700 transition-colors">Adobe Manager</a>
-            <span>/</span>
-            <span className="text-gray-700 font-medium">Centro de Servicios</span>
+      <div className="bg-surface border-b px-6 py-4 flex items-center justify-between sticky top-0 z-20"
+        style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3.5">
+          <div className="dv-icon-tile" style={{ background: 'var(--brand)', color: 'var(--accent)' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Centro de Servicios</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Turnitin · IA · Asesorías · Tesis</p>
+          <div>
+            <div className="flex items-center gap-2">
+              <a href="/dashboard" className="dv-eyebrow hover:text-[var(--accent-hover)] transition-colors">Panel</a>
+              <span className="dv-eyebrow">·</span>
+              <span className="dv-eyebrow" style={{ color: 'var(--accent-hover)' }}>Servicios</span>
+            </div>
+            <h1 className="font-serif text-[21px] font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>Centro de Servicios</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>Turnitin · IA · Asesorías · Tesis</p>
+          </div>
         </div>
         <button
           onClick={() => { setForm(FORM_VACIO); setModal(true); }}
-          className="bg-gray-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
+          className="dv-btn-primary"
         >
           + Nuevo servicio
         </button>
@@ -128,16 +136,16 @@ export default function ServiciosPage() {
 
       <div className="p-6 max-w-5xl mx-auto">
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[
-            { label: 'TOTAL',       value: stats.total,       color: 'text-gray-900'   },
-            { label: 'PENDIENTES',  value: stats.pendientes,  color: 'text-yellow-600' },
-            { label: 'EN PROCESO',  value: stats.enProceso,   color: 'text-blue-600'   },
-            { label: 'COMPLETADOS', value: stats.completados, color: 'text-green-600'  },
-          ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl p-5 border border-gray-100">
-              <p className="text-xs text-gray-400 font-medium tracking-wider mb-2">{s.label}</p>
-              <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
+            { label: 'Total',       value: stats.total,       color: 'var(--text-primary)' },
+            { label: 'Pendientes',  value: stats.pendientes,  color: 'var(--warning)'      },
+            { label: 'En proceso',  value: stats.enProceso,   color: 'var(--brand)'        },
+            { label: 'Completados', value: stats.completados, color: 'var(--success)'      },
+          ].map((s, i) => (
+            <div key={s.label} className={`dv-card dv-hover-lift p-5 dv-animate-up dv-delay-${i + 1}`}>
+              <p className="dv-eyebrow mb-2">{s.label}</p>
+              <p className="text-3xl font-bold font-serif" style={{ color: s.color }}>{s.value}</p>
             </div>
           ))}
         </div>
@@ -147,7 +155,7 @@ export default function ServiciosPage() {
           <select
             value={filtroTipo}
             onChange={e => setFiltroTipo(e.target.value)}
-            className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none"
+            className="dv-input !w-auto"
           >
             <option value="TODOS">Todos los tipos</option>
             {Object.entries(TIPOS).map(([k, v]) => (
@@ -157,7 +165,7 @@ export default function ServiciosPage() {
           <select
             value={filtroEstado}
             onChange={e => setFiltroEstado(e.target.value)}
-            className="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none"
+            className="dv-input !w-auto"
           >
             <option value="TODOS">Todos los estados</option>
             {Object.entries(ESTADOS).map(([k, v]) => (
@@ -168,12 +176,14 @@ export default function ServiciosPage() {
 
         {/* Lista */}
         {cargando ? (
-          <div className="text-center py-12 text-gray-400">Cargando...</div>
+          <div className="grid gap-3">
+            {[0, 1, 2].map((i) => <div key={i} className="dv-skeleton h-24 w-full" />)}
+          </div>
         ) : filtrados.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="dv-card text-center py-16 dv-animate-in">
             <p className="text-4xl mb-3">📋</p>
-            <p className="text-gray-500 font-medium">No hay servicios</p>
-            <p className="text-gray-400 text-sm mt-1">Crea el primero con el botón de arriba</p>
+            <p className="font-medium" style={{ color: 'var(--text-secondary)' }}>No hay servicios</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Crea el primero con el botón de arriba</p>
           </div>
         ) : (
           <div className="grid gap-3">
@@ -182,7 +192,7 @@ export default function ServiciosPage() {
               const estado = ESTADOS[s.estado];
               const esRapido = s.tipo_servicio === 'TURNITIN' || s.tipo_servicio === 'IA_REDUCCION';
               return (
-                <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-all">
+                <div key={s.id} className="dv-card dv-hover-lift p-4 dv-animate-up">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <span className="text-2xl mt-0.5">{tipo.emoji}</span>
@@ -191,21 +201,21 @@ export default function ServiciosPage() {
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${tipo.color}`}>{tipo.label}</span>
                           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${estado.color}`}>{estado.label}</span>
                           {s.prioridad === 'ALTA' && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Alta prioridad</span>
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700">Alta prioridad</span>
                           )}
                         </div>
-                        <p className="font-semibold text-gray-900">{s.nombre_cliente}</p>
-                        {s.telefono && <p className="text-sm text-gray-400 mt-0.5">{s.telefono}</p>}
-                        {s.descripcion && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{s.descripcion}</p>}
+                        <p className="font-semibold text-[var(--text-primary)]">{s.nombre_cliente}</p>
+                        {s.telefono && <p className="text-sm text-[var(--text-muted)] mt-0.5">{s.telefono}</p>}
+                        {s.descripcion && <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">{s.descripcion}</p>}
                         {!esRapido && typeof s.porcentaje_actual === 'number' && (
                           <div className="mt-2">
-                            <div className="flex justify-between text-xs text-gray-400 mb-1">
+                            <div className="flex justify-between text-xs text-[var(--text-muted)] mb-1">
                               <span>Avance</span><span>{s.porcentaje_actual}%</span>
                             </div>
-                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--brand-soft)' }}>
                               <div
-                                className="h-full bg-blue-500 rounded-full transition-all"
-                                style={{ width: `${s.porcentaje_actual}%` }}
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${s.porcentaje_actual}%`, background: 'linear-gradient(90deg, var(--brand), var(--accent))' }}
                               />
                             </div>
                           </div>
@@ -213,9 +223,9 @@ export default function ServiciosPage() {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <p className="font-bold text-gray-900">S/. {Number(s.monto).toFixed(2)}</p>
+                      <p className="font-bold text-[var(--text-primary)]">S/. {Number(s.monto).toFixed(2)}</p>
                       {s.fecha_entrega_esperada && (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-[var(--text-muted)]">
                           📅 {new Date(s.fecha_entrega_esperada).toLocaleDateString('es-PE')}
                         </p>
                       )}
@@ -224,7 +234,7 @@ export default function ServiciosPage() {
                           <select
                             value={s.estado}
                             onChange={e => cambiarEstado(s.id, e.target.value as EstadoServicio)}
-                            className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white cursor-pointer"
+                            className="text-xs border border-[var(--border)] rounded-lg px-2 py-1 bg-[var(--surface)] cursor-pointer"
                           >
                             {Object.entries(ESTADOS).map(([k, v]) => (
                               <option key={k} value={k}>{v.label}</option>
@@ -236,7 +246,7 @@ export default function ServiciosPage() {
                             href={`https://wa.me/${s.telefono.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${s.nombre_cliente}, tengo una actualización de tu servicio ${tipo.label}.`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-lg hover:bg-green-100 transition-colors font-medium"
+                            className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
                           >
                             💬 WA
                           </a>
@@ -254,16 +264,16 @@ export default function ServiciosPage() {
       {/* Modal overlay */}
       {modal && (
         <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          className="dv-modal-backdrop"
           onClick={e => { if (e.target === e.currentTarget) setModal(false); }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="dv-modal max-w-lg max-h-[90vh] overflow-y-auto">
             {/* Modal header */}
-            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="font-bold text-gray-900 text-lg">Nuevo servicio</h2>
+            <div className="sticky top-0 bg-[var(--surface)] border-b border-[var(--border)] px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="font-bold text-[var(--text-primary)] text-lg">Nuevo servicio</h2>
               <button
                 onClick={() => setModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-muted)]"
               >
                 ✕
               </button>
@@ -272,19 +282,19 @@ export default function ServiciosPage() {
             <div className="p-6 space-y-4">
               {/* Tipo de servicio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de servicio</label>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Tipo de servicio</label>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(TIPOS).map(([k, v]) => (
                     <button
                       key={k}
                       onClick={() => setForm(p => ({ ...p, tipo_servicio: k as TipoServicio, monto: v.monto }))}
                       className={`p-3 rounded-xl border-2 text-left transition-all ${
-                        form.tipo_servicio === k ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'
+                        form.tipo_servicio === k ? 'border-[var(--brand)] bg-[var(--surface-muted)]' : 'border-[var(--border)] hover:border-[var(--border-strong)]'
                       }`}
                     >
                       <div className="text-xl mb-1">{v.emoji}</div>
-                      <div className="text-xs font-semibold text-gray-800">{v.label}</div>
-                      <div className="text-xs text-gray-400">S/. {v.monto}</div>
+                      <div className="text-xs font-semibold text-[var(--text-primary)]">{v.label}</div>
+                      <div className="text-xs text-[var(--text-muted)]">S/. {v.monto}</div>
                     </button>
                   ))}
                 </div>
@@ -293,56 +303,56 @@ export default function ServiciosPage() {
               {/* Nombre + WhatsApp */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre cliente *</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Nombre cliente *</label>
                   <input
                     type="text"
                     value={form.nombre_cliente}
                     onChange={e => setForm(p => ({ ...p, nombre_cliente: e.target.value }))}
                     placeholder="Ej: María García"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">WhatsApp</label>
                   <input
                     type="text"
                     value={form.telefono}
                     onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
                     placeholder="+51 999 999 999"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email (opcional)</label>
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Email (opcional)</label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                   placeholder="cliente@email.com"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
                 />
               </div>
 
               {/* Monto + Prioridad */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monto S/.</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Monto S/.</label>
                   <input
                     type="number"
                     value={form.monto}
                     onChange={e => setForm(p => ({ ...p, monto: parseFloat(e.target.value) }))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Prioridad</label>
                   <select
                     value={form.prioridad}
                     onChange={e => setForm(p => ({ ...p, prioridad: e.target.value as Prioridad }))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white"
+                    className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)] bg-[var(--surface)]"
                   >
                     <option value="ALTA">🔴 Alta</option>
                     <option value="NORMAL">🟡 Normal</option>
@@ -354,24 +364,24 @@ export default function ServiciosPage() {
               {/* Fecha + % Avance (solo tesis y asesoría) */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de entrega</label>
+                  <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Fecha de entrega</label>
                   <input
                     type="date"
                     value={form.fecha_entrega_esperada}
                     onChange={e => setForm(p => ({ ...p, fecha_entrega_esperada: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
                   />
                 </div>
                 {(form.tipo_servicio === 'TESIS_COMPLETA' || form.tipo_servicio === 'ASESORIA') && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">% Avance inicial</label>
+                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">% Avance inicial</label>
                     <input
                       type="number"
                       min="0"
                       max="100"
                       value={form.porcentaje_actual}
                       onChange={e => setForm(p => ({ ...p, porcentaje_actual: parseInt(e.target.value) }))}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                      className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)]"
                     />
                   </div>
                 )}
@@ -379,7 +389,7 @@ export default function ServiciosPage() {
 
               {/* Descripción */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">
                   {form.tipo_servicio === 'TURNITIN'      ? 'Notas del documento'      :
                    form.tipo_servicio === 'IA_REDUCCION'  ? 'Notas sobre el documento' :
                    form.tipo_servicio === 'ASESORIA'      ? 'Descripción de la asesoría' :
@@ -395,23 +405,23 @@ export default function ServiciosPage() {
                     form.tipo_servicio === 'ASESORIA'      ? 'Ej: Tesis de arquitectura, capítulo 3...' :
                     'Ej: Tesis de comunicación digital, USAT...'
                   }
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200 resize-none"
+                  className="w-full border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-soft)] resize-none"
                 />
               </div>
             </div>
 
             {/* Modal footer */}
-            <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3 rounded-b-2xl">
+            <div className="sticky bottom-0 bg-[var(--surface)] border-t border-[var(--border)] px-6 py-4 flex gap-3 rounded-b-2xl">
               <button
                 onClick={() => setModal(false)}
-                className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-[var(--border)] text-[var(--text-secondary)] py-2.5 rounded-xl text-sm font-medium hover:bg-[var(--surface-muted)] transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={guardar}
                 disabled={guardando || !form.nombre_cliente.trim()}
-                className="flex-1 bg-gray-900 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 dv-btn-primary !py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {guardando ? 'Guardando...' : 'Crear servicio'}
               </button>
