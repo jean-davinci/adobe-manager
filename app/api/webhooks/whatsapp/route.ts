@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { getContactoPorTelefono, upsertContacto, guardarMensaje } from '@/lib/crm';
 import { autoRespuestaFueraHorario } from '@/lib/automatizaciones';
+
+// Verifica la firma HMAC-SHA256 que Meta envía en x-hub-signature-256.
+// Si no hay WHATSAPP_APP_SECRET configurado, se acepta el body sin firma
+// (modo dev/mock). En prod conviene definir el secret.
+function firmaValida(rawBody: string, header: string | null): boolean {
+  const secret = process.env.WHATSAPP_APP_SECRET;
+  if (!secret) return true;
+  if (!header || !header.startsWith('sha256=')) return false;
+  const esperado = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+  const recibido = header.slice('sha256='.length);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(esperado, 'hex'), Buffer.from(recibido, 'hex'));
+  } catch {
+    return false;
+  }
+}
 
 // Verificación del webhook (Meta hace un GET con hub.challenge al configurarlo).
 export async function GET(req: NextRequest) {
@@ -18,7 +35,11 @@ export async function GET(req: NextRequest) {
 // para pruebas en local: { telefono, nombre, texto }.
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+    if (!firmaValida(rawBody, req.headers.get('x-hub-signature-256'))) {
+      return NextResponse.json({ error: 'Firma inválida' }, { status: 401 });
+    }
+    const body = JSON.parse(rawBody);
 
     // Formato simple para pruebas locales (sin Meta)
     if (body.telefono && body.texto) {

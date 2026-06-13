@@ -2,10 +2,24 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { contarUsuarios, crearUsuario } from '@/lib/usuarios';
 
-// Crea el PRIMER usuario admin. Solo funciona si la tabla está vacía,
-// por lo que no puede usarse para crear usuarios extra. Borrar este
-// archivo una vez exista el admin si se desea.
+// Crea el PRIMER usuario admin. Solo funciona si la tabla está vacía Y, en
+// producción, requiere el header `x-seed-secret: $SEED_SECRET`. En desarrollo
+// queda abierto para arrancar local sin fricción. Borrar este archivo después
+// de crear el primer admin si se quiere reducir superficie.
 export async function POST(req: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    const expected = process.env.SEED_SECRET;
+    if (!expected) {
+      return NextResponse.json(
+        { error: 'SEED_SECRET no configurado. Define la variable o desactiva esta ruta.' },
+        { status: 503 }
+      );
+    }
+    if (req.headers.get('x-seed-secret') !== expected) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+  }
+
   let total: number;
   try {
     total = await contarUsuarios();

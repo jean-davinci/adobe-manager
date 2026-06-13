@@ -1,23 +1,32 @@
 import type { NextConfig } from "next";
 
-// Cabeceras de seguridad aplicadas a todas las respuestas.
+const isProd = process.env.NODE_ENV === "production";
+
+// Cabeceras de seguridad aplicadas a todas las respuestas. Hardening progresivo
+// según el entorno (Next/Turbopack necesita 'unsafe-eval' para HMR en dev).
 const securityHeaders = [
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   {
-    key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains; preload",
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()",
   },
+  // HSTS solo en producción (no aplicar a localhost).
+  ...(isProd
+    ? [{
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      }]
+    : []),
   {
     // CSP pragmática: permite Next (estilos/inline runtime) y los iframes/medios
     // que usan los módulos (Gmail embed, Drive preview, imágenes de WhatsApp).
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
@@ -27,7 +36,8 @@ const securityHeaders = [
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-      "frame-ancestors 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests",
     ].join("; "),
   },
 ];

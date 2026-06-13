@@ -10,8 +10,9 @@ function autorizado(req: NextRequest): boolean {
   const auth = req.headers.get('authorization');
   if (process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`) return true;
   if (req.headers.get('x-vercel-cron')) return true;
-  // En desarrollo permitimos invocarlo a mano.
-  return process.env.NODE_ENV !== 'production';
+  // En desarrollo permitimos invocarlo a mano. En producción exigimos CRON_SECRET.
+  if (process.env.NODE_ENV === 'production') return false;
+  return true;
 }
 
 export async function GET(req: NextRequest) {
