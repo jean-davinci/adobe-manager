@@ -11,6 +11,13 @@ export async function POST(req: NextRequest) {
     const fd = await req.formData();
     const file = fd.get('comprobante') as File | null;
     if (!file) return NextResponse.json({ error: 'Falta archivo' }, { status: 400 });
+    const EXT_OK = ['.pdf', '.jpg', '.jpeg', '.png'];
+    if (!EXT_OK.some((e) => file.name.toLowerCase().endsWith(e))) {
+      return NextResponse.json({ error: 'Tipo no permitido (.pdf, .jpg, .png)' }, { status: 400 });
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'El archivo supera 10 MB' }, { status: 413 });
+    }
 
     const mes = new Date().toISOString().slice(0, 7);
     const dir = path.join(process.cwd(), 'public', 'comprobantes', mes);

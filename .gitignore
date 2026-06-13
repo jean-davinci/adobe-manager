@@ -47,3 +47,6 @@ uploads/
 public/reportes/
 public/comprobantes/
 public/crm-media/
+
+# Carpeta de referencia del brief (no es parte de la app)
+davinci-final/

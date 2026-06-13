@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { decrypt } from '@/lib/session';
 
-// Rutas de staff (admin/operador)
-const STAFF_PREFIXES = ['/dashboard'];
+// Rutas de staff (admin/operador). El gestor Adobe vive ahora en
+// /dashboard/afiliados; '/' es la landing pública.
+const STAFF_PREFIXES = ['/dashboard', '/servicios', '/proyectos', '/ganancias'];
 // Rutas del portal del cliente
 const CLIENT_PREFIXES = ['/mi-acceso', '/portal'];
 

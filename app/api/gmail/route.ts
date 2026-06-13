@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
+import { requireApi } from '@/lib/api-auth';
 
 export async function POST(req: NextRequest) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const { access_token } = await req.json();
 

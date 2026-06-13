@@ -1,17 +1,17 @@
 import { requireRole } from '@/lib/dal';
-import Home from '@/app/page';
+import AdobeManager from './AdobeManager';
 import AfiliadosExtras from './AfiliadosExtras';
 
 export const metadata = { title: 'Afiliados — Davinci Labs' };
 
-// Panel de afiliados (operador/admin) protegido por rol. Reutiliza el gestor
-// Adobe existente y le añade la bandeja Gmail + notificaciones de vencimiento.
+// Panel de afiliados (operador/admin) protegido por rol: gestor Adobe
+// + bandeja Gmail + notificaciones de vencimiento.
 export default async function AfiliadosPage() {
   await requireRole('ADMIN', 'OPERATOR');
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen" style={{ background: 'var(--background)' }}>
       <AfiliadosExtras />
-      <Home />
+      <AdobeManager />
     </div>
   );
 }

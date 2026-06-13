@@ -19,20 +19,61 @@ type Documento = {
   created_at: string;
 };
 
-const ESTADOS: Record<DocEstado, { label: string; color: string }> = {
-  RECIBIDO: { label: 'Recibido', color: 'bg-yellow-100 text-yellow-700' },
-  EN_PROCESO: { label: 'En proceso', color: 'bg-blue-100 text-blue-700' },
-  COMPLETADO: { label: 'Completado', color: 'bg-green-100 text-green-700' },
+const ESTADOS: Record<DocEstado, { label: string; badge: string }> = {
+  RECIBIDO: { label: 'Recibido', badge: 'dv-badge-warning' },
+  EN_PROCESO: { label: 'En proceso', badge: 'dv-badge-brand' },
+  COMPLETADO: { label: 'Completado', badge: 'dv-badge-success' },
 };
 const TIPOS = ['IA', 'SIMILITUD', 'AMBOS', 'TURNITIN_OFICIAL'];
 
 const PANELES = [
-  { nombre: 'iVerificate (Detección IA)', url: 'https://iverificate.com/originality/inbox', emoji: '🤖', color: 'border-purple-200 bg-purple-50' },
-  { nombre: 'Canvas / iThenticate (Similitud)', url: 'https://my.canvasacademic.com/ithenticate', emoji: '📊', color: 'border-blue-200 bg-blue-50' },
-  { nombre: 'Turnitin Oficial', url: 'https://www.turnitin.com/login_page.asp?lang=es', emoji: '🎓', color: 'border-gray-200 bg-gray-50' },
+  {
+    nombre: 'iVerificate',
+    detalle: 'Detección de IA',
+    url: 'https://iverificate.com/originality/inbox',
+    icono: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="4" y="4" width="16" height="16" rx="3" /><circle cx="9.5" cy="10" r="1" fill="currentColor" /><circle cx="14.5" cy="10" r="1" fill="currentColor" /><path d="M9 15h6" />
+      </svg>
+    ),
+  },
+  {
+    nombre: 'Canvas / iThenticate',
+    detalle: 'Similitud Turnitin',
+    url: 'https://my.canvasacademic.com/ithenticate',
+    icono: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 3v18h18" /><rect x="7" y="10" width="3" height="7" rx="0.5" /><rect x="13" y="6" width="3" height="11" rx="0.5" />
+      </svg>
+    ),
+  },
+  {
+    nombre: 'Turnitin Oficial',
+    detalle: 'Cuenta institucional',
+    url: 'https://www.turnitin.com/login_page.asp?lang=es',
+    icono: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
+      </svg>
+    ),
+  },
 ];
 
 const kb = (b: number | null) => (b == null ? '—' : b < 1e6 ? (b / 1e3).toFixed(0) + ' KB' : (b / 1e6).toFixed(1) + ' MB');
+
+function SkeletonTabla() {
+  return (
+    <div className="p-4 space-y-3">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="flex items-center gap-4">
+          <div className="dv-skeleton h-9 w-1/4" />
+          <div className="dv-skeleton h-9 w-1/3" />
+          <div className="dv-skeleton h-9 flex-1" />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DocumentosClient() {
   const [docs, setDocs] = useState<Documento[]>([]);
@@ -99,129 +140,141 @@ export default function DocumentosClient() {
   return (
     <div className="space-y-6">
       {/* Paneles de procesamiento */}
-      <div>
+      <div className="dv-animate-up">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-900">Paneles de procesamiento</h2>
-          <button onClick={() => setSubir(true)}
-            className="px-4 py-1.5 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 font-medium">
+          <div>
+            <h2 className="font-serif text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Paneles de procesamiento</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              Estos sitios bloquean el embebido (X-Frame-Options); se abren en ventana aparte con la sesión del operador.
+            </p>
+          </div>
+          <button onClick={() => setSubir(true)} className="dv-btn-primary">
             + Subir documento
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {PANELES.map((p) => (
-            <div key={p.nombre} className={`rounded-2xl border p-4 ${p.color}`}>
-              <div className="text-2xl mb-2">{p.emoji}</div>
-              <h3 className="text-sm font-semibold text-gray-900 leading-tight mb-1">{p.nombre}</h3>
-              <p className="text-xs text-gray-500 mb-3">Sesión del operador (cookies en el navegador).</p>
-              <button onClick={() => window.open(p.url, '_blank', 'noopener')}
-                className="w-full py-2 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50">
+          {PANELES.map((p, i) => (
+            <div key={p.nombre} className={`dv-card dv-hover-lift p-4 dv-animate-up dv-delay-${i + 1}`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="dv-icon-tile" style={{ background: 'var(--brand-soft)', color: 'var(--brand)' }}>{p.icono}</div>
+                <div>
+                  <h3 className="text-sm font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>{p.nombre}</h3>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{p.detalle}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => window.open(p.url, '_blank', 'noopener')}
+                className="w-full py-2 rounded-lg text-xs font-medium border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent-hover)]"
+                style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--surface)' }}
+              >
                 Abrir en nueva ventana ↗
               </button>
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-400 mt-2">
-          Estos sitios bloquean el embebido (X-Frame-Options), por eso se abren en ventana aparte y aquí queda el registro del documento activo.
-        </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        {(['RECIBIDO', 'EN_PROCESO', 'COMPLETADO'] as DocEstado[]).map((e) => (
-          <div key={e} className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs text-gray-400 mb-1">{ESTADOS[e].label}</p>
-            <p className="text-2xl font-bold text-gray-900">{conteo(e)}</p>
-          </div>
+        {(['RECIBIDO', 'EN_PROCESO', 'COMPLETADO'] as DocEstado[]).map((e, i) => (
+          <button key={e} onClick={() => setFiltro(filtro === e ? 'TODOS' : e)}
+            className={`dv-card dv-hover-lift p-4 text-left dv-animate-up dv-delay-${i + 2} ${filtro === e ? 'ring-2 ring-[var(--accent)]' : ''}`}>
+            <p className="dv-eyebrow mb-1">{ESTADOS[e].label}</p>
+            <p className="text-2xl font-bold font-serif" style={{ color: 'var(--text-primary)' }}>{conteo(e)}</p>
+          </button>
         ))}
       </div>
 
       {/* Tabla de documentos */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div className="flex items-center gap-2 p-4 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900">Documentos</h2>
-          <select value={filtro} onChange={(e) => setFiltro(e.target.value as any)}
-            className="ml-auto border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm">
+      <div className="dv-card overflow-hidden dv-animate-up dv-delay-3">
+        <div className="flex items-center gap-2 p-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <h2 className="font-serif text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Documentos</h2>
+          <select value={filtro} onChange={(e) => setFiltro(e.target.value as any)} className="dv-input ml-auto !w-auto !py-1.5">
             <option value="TODOS">Todos</option>
             <option value="RECIBIDO">Recibidos</option>
             <option value="EN_PROCESO">En proceso</option>
             <option value="COMPLETADO">Completados</option>
           </select>
           <a href={`/api/documentos/daily-log?date=${new Date().toISOString().split('T')[0]}&format=csv`}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100">
+            className="px-3 py-1.5 text-sm border rounded-lg transition-colors hover:bg-[var(--surface-muted)]"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
             ⬇ CSV
           </a>
           <a href={`/api/documentos/daily-log?date=${new Date().toISOString().split('T')[0]}&format=pdf`}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-100">
+            className="px-3 py-1.5 text-sm border rounded-lg transition-colors hover:bg-[var(--surface-muted)]"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
             ⬇ PDF
           </a>
         </div>
 
         {cargando ? (
-          <div className="py-12 text-center text-gray-400 text-sm">Cargando...</div>
+          <SkeletonTabla />
         ) : docs.length === 0 ? (
-          <div className="py-12 text-center text-gray-400 text-sm">No hay documentos. Sube el primero.</div>
+          <div className="py-14 text-center dv-animate-in">
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No hay documentos. Sube el primero.</p>
+          </div>
         ) : (
-          <table className="w-full text-sm">
+          <table className="dv-table">
             <thead>
-              <tr className="text-xs text-gray-400 border-b border-gray-100">
-                <th className="text-left font-medium px-4 py-2.5">Cliente</th>
-                <th className="text-left font-medium px-4 py-2.5">Archivo</th>
-                <th className="text-left font-medium px-4 py-2.5">Servicio</th>
-                <th className="text-left font-medium px-4 py-2.5">Estado</th>
-                <th className="text-left font-medium px-4 py-2.5">Drive</th>
-                <th className="text-left font-medium px-4 py-2.5">Reportes</th>
-                <th className="text-right font-medium px-4 py-2.5">Acciones</th>
+              <tr>
+                <th>Cliente</th>
+                <th>Archivo</th>
+                <th>Servicio</th>
+                <th>Estado</th>
+                <th>Drive</th>
+                <th>Reportes</th>
+                <th style={{ textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {docs.map((d) => (
-                <tr key={d.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-2.5">
-                    <div className="font-medium text-gray-900">{d.cliente_nombre}</div>
-                    <div className="text-xs text-gray-400">{d.cliente_email || '—'}</div>
+                <tr key={d.id}>
+                  <td>
+                    <div className="font-medium">{d.cliente_nombre}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{d.cliente_email || '—'}</div>
                   </td>
-                  <td className="px-4 py-2.5">
-                    <div className="text-gray-700">{d.nombre_archivo}</div>
-                    <div className="text-xs text-gray-400">{kb(d.tamano_bytes)}</div>
+                  <td>
+                    <div style={{ color: 'var(--text-secondary)' }}>{d.nombre_archivo}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>{kb(d.tamano_bytes)}</div>
                   </td>
-                  <td className="px-4 py-2.5">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{d.tipo_servicio}</span>
-                  </td>
-                  <td className="px-4 py-2.5">
+                  <td><span className="dv-badge dv-badge-muted">{d.tipo_servicio}</span></td>
+                  <td>
                     <select value={d.estado} onChange={(e) => cambiarEstado(d.id, e.target.value as DocEstado)}
-                      className={`text-xs px-2 py-1 rounded-lg border-0 font-medium ${ESTADOS[d.estado].color}`}>
+                      className={`dv-badge ${ESTADOS[d.estado].badge} cursor-pointer border-0`}>
                       {(Object.keys(ESTADOS) as DocEstado[]).map((e) => (
                         <option key={e} value={e}>{ESTADOS[e].label}</option>
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-2.5">
+                  <td>
                     {d.url_drive
-                      ? <a href={d.url_drive} target="_blank" className="text-xs text-blue-500 hover:underline">Ver ↗</a>
-                      : <span className="text-xs text-gray-300">sincronizando…</span>}
+                      ? <a href={d.url_drive} target="_blank" className="text-xs hover:underline" style={{ color: 'var(--accent-hover)' }}>Ver ↗</a>
+                      : <span className="text-xs" style={{ color: 'var(--text-muted)' }}>sincronizando…</span>}
                   </td>
-                  <td className="px-4 py-2.5">
+                  <td>
                     <div className="flex flex-col gap-1">
                       {d.reporte_ia_url
-                        ? <a href={d.reporte_ia_url} target="_blank" className="text-xs text-purple-600 hover:underline">🤖 IA ↗</a>
+                        ? <a href={d.reporte_ia_url} target="_blank" className="text-xs hover:underline font-medium" style={{ color: 'var(--brand)' }}>🤖 IA ↗</a>
                         : <button onClick={() => traerReporte(d, 'iverificate')} disabled={trayendo === d.id + 'iverificate'}
-                            className="text-xs text-gray-500 hover:text-purple-600 text-left disabled:opacity-40">
+                            className="text-xs text-left disabled:opacity-40 transition-colors hover:text-[var(--brand)]" style={{ color: 'var(--text-muted)' }}>
                             {trayendo === d.id + 'iverificate' ? '…' : '+ IA'}
                           </button>}
                       {d.reporte_similitud_url
-                        ? <a href={d.reporte_similitud_url} target="_blank" className="text-xs text-blue-600 hover:underline">📊 Similitud ↗</a>
+                        ? <a href={d.reporte_similitud_url} target="_blank" className="text-xs hover:underline font-medium" style={{ color: 'var(--accent-hover)' }}>📊 Similitud ↗</a>
                         : <button onClick={() => traerReporte(d, 'canvas')} disabled={trayendo === d.id + 'canvas'}
-                            className="text-xs text-gray-500 hover:text-blue-600 text-left disabled:opacity-40">
+                            className="text-xs text-left disabled:opacity-40 transition-colors hover:text-[var(--accent-hover)]" style={{ color: 'var(--text-muted)' }}>
                             {trayendo === d.id + 'canvas' ? '…' : '+ Similitud'}
                           </button>}
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-right">
+                  <td style={{ textAlign: 'right' }}>
                     {d.url_informe ? (
-                      <a href={d.url_informe} target="_blank" className="text-xs text-green-600 hover:underline">📄 Informe</a>
+                      <a href={d.url_informe} target="_blank" className="text-xs hover:underline font-medium" style={{ color: 'var(--success)' }}>📄 Informe</a>
                     ) : (
                       <button onClick={() => { setActivo(d); setTimeout(() => informeRef.current?.click(), 0); }}
-                        className="text-xs text-gray-500 hover:text-gray-900">Subir informe</button>
+                        className="text-xs transition-colors hover:text-[var(--text-primary)]" style={{ color: 'var(--text-muted)' }}>
+                        Subir informe
+                      </button>
                     )}
                   </td>
                 </tr>
@@ -248,6 +301,7 @@ function ModalSubir({ onClose, onDone }: { onClose: () => void; onDone: () => vo
   const [form, setForm] = useState({ cliente_nombre: '', cliente_email: '', tipo_servicio: 'AMBOS' });
   const [file, setFile] = useState<File | null>(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [arrastrando, setArrastrando] = useState(false);
 
   const enviar = async () => {
     if (!file || !form.cliente_nombre) return;
@@ -269,39 +323,65 @@ function ModalSubir({ onClose, onDone }: { onClose: () => void; onDone: () => vo
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-        <h2 className="text-base font-semibold text-gray-900 mb-4">Subir documento</h2>
+    <div className="dv-modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="dv-modal max-w-md p-6">
+        <h2 className="font-serif text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Subir documento</h2>
         <div className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Nombre del cliente *</label>
-            <input value={form.cliente_nombre} onChange={(e) => setForm((f) => ({ ...f, cliente_nombre: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" />
+            <label className="dv-label">Nombre del cliente *</label>
+            <input value={form.cliente_nombre} onChange={(e) => setForm((f) => ({ ...f, cliente_nombre: e.target.value }))} className="dv-input" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Email del cliente</label>
-            <input type="email" value={form.cliente_email} onChange={(e) => setForm((f) => ({ ...f, cliente_email: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm" />
+            <label className="dv-label">Email del cliente</label>
+            <input type="email" value={form.cliente_email} onChange={(e) => setForm((f) => ({ ...f, cliente_email: e.target.value }))} className="dv-input" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Servicio</label>
-            <select value={form.tipo_servicio} onChange={(e) => setForm((f) => ({ ...f, tipo_servicio: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm">
+            <label className="dv-label">Servicio</label>
+            <select value={form.tipo_servicio} onChange={(e) => setForm((f) => ({ ...f, tipo_servicio: e.target.value }))} className="dv-input">
               {TIPOS.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Archivo (.docx / .pdf) *</label>
-            <input type="file" accept=".doc,.docx,.pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700" />
+            <label className="dv-label">Archivo (.docx / .pdf) *</label>
+            <label
+              onDragOver={(e) => { e.preventDefault(); setArrastrando(true); }}
+              onDragLeave={() => setArrastrando(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setArrastrando(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) setFile(f);
+              }}
+              className="flex flex-col items-center justify-center gap-1 py-6 px-3 rounded-xl border-2 border-dashed cursor-pointer transition-colors text-center"
+              style={{
+                borderColor: arrastrando ? 'var(--accent)' : 'var(--border-strong)',
+                background: arrastrando ? 'var(--accent-soft)' : 'var(--surface-muted)',
+              }}
+            >
+              <input type="file" accept=".doc,.docx,.pdf" className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              {file ? (
+                <>
+                  <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>📄 {file.name}</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Click para cambiar</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>Arrastra el archivo aquí</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>o haz click para buscarlo</span>
+                </>
+              )}
+            </label>
           </div>
         </div>
         <div className="flex gap-2 mt-5">
-          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600">Cancelar</button>
+          <button onClick={onClose} className="flex-1 py-2.5 border rounded-xl text-sm transition-colors hover:bg-[var(--surface-muted)]"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+            Cancelar
+          </button>
           <button onClick={enviar} disabled={subiendo || !file || !form.cliente_nombre}
-            className="flex-1 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium disabled:bg-gray-300">
-            {subiendo ? 'Subiendo...' : 'Subir'}
+            className="flex-1 dv-btn-primary disabled:opacity-40">
+            {subiendo ? 'Subiendo…' : 'Subir'}
           </button>
         </div>
       </div>

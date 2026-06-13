@@ -11,6 +11,12 @@ export async function POST(req: NextRequest) {
     const fd = await req.formData();
     const file = fd.get('media') as File | null;
     if (!file) return NextResponse.json({ error: 'Falta archivo' }, { status: 400 });
+    if (!file.type.startsWith('image/')) {
+      return NextResponse.json({ error: 'Solo se permiten imágenes' }, { status: 400 });
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'La imagen supera 10 MB' }, { status: 413 });
+    }
     const dir = path.join(process.cwd(), 'public', 'crm-media');
     await mkdir(dir, { recursive: true });
     const safe = `${Date.now()}_${file.name.replace(/[^\w.\-]/g, '_')}`;

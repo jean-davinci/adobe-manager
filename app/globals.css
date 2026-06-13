@@ -1,23 +1,355 @@
 @import "tailwindcss";
 
+/* ────────────────────────────────────────────────
+   Davinci Labs · Sistema de diseño v3
+   Tema claro — Blanco + azules del logo (#1E3A5F / #4EA1FF) + Poppins
+   ──────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colores base — blanco dominante con los azules del logo Davinci */
+  --background: #F7FAFC;        /* Blanco azulado muy suave */
+  --foreground: #16293F;
+  --surface: #FFFFFF;           /* Cards, modales */
+  --surface-muted: #F1F5F9;     /* Headers de tabla, paneles, hover */
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  /* Brand (azules del logo: #1e3a5f + #4ea1ff) */
+  --brand: #1E3A5F;             /* Navy del logo — CTAs, sidebar */
+  --brand-hover: #2A4F7F;
+  --brand-soft: #E8F0F9;
+  --accent: #4EA1FF;            /* Celeste del logo — acentos */
+  --accent-hover: #2186F5;
+  --accent-soft: #EAF4FF;
+
+  /* Estados */
+  --success: #0E9F6E;
+  --success-soft: #E3F5EE;
+  --warning: #C27803;
+  --warning-soft: #FDF3E2;
+  --danger: #DC2626;
+  --danger-soft: #FCE9E9;
+
+  /* Texto */
+  --text-primary: #16293F;
+  --text-secondary: #5A6B7F;
+  --text-muted: #8A98A8;
+
+  /* Azules de apoyo */
+  --blue-pale: #4EA1FF;         /* Acentos sobre navy */
+  --blue-tag: #EAF4FF;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-rubik: var(--font-rubik), system-ui, sans-serif;
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --font-sans: var(--font-poppins), system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+}
+
+/* Legacy: las cabeceras seguían usando .font-serif — ahora es Poppins semibold */
+.font-serif {
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .font-rubik {
-  font-family: var(--font-rubik), system-ui, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+}
+
+/* ────────────────────────────────────────────────
+   Componentes utilitarios reutilizables
+   ──────────────────────────────────────────────── */
+
+/* Card base */
+.dv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(30, 58, 95, 0.06);
+}
+
+.dv-card-muted {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* Botón primario (pill) */
+.dv-btn-primary {
+  background: var(--brand);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.dv-btn-primary:hover {
+  background: var(--brand-hover);
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.28);
+}
+
+.dv-btn-accent {
+  background: var(--accent-hover);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.dv-btn-accent:hover { background: var(--accent-hover); box-shadow: 0 4px 16px rgba(78, 161, 255, 0.35); }
+
+/* Botón secundario (borde) */
+.dv-btn-ghost {
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.5rem 1.1rem;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  background: transparent;
+}
+.dv-btn-ghost:hover { border-color: var(--accent); color: var(--accent-hover); background: var(--accent-soft); }
+
+/* Etiquetas pequeñas (eyebrow) */
+.dv-eyebrow {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Badges de estado */
+.dv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.dv-badge-success { background: var(--success-soft); color: var(--success); }
+.dv-badge-warning { background: var(--warning-soft); color: var(--warning); }
+.dv-badge-danger  { background: var(--danger-soft);  color: var(--danger); }
+.dv-badge-brand   { background: var(--brand-soft);   color: var(--brand); }
+.dv-badge-accent  { background: var(--accent-soft);  color: var(--accent-hover); }
+.dv-badge-muted   { background: var(--surface-muted); color: var(--text-secondary); border: 1px solid var(--border); }
+
+/* ────────────────────────────────────────────────
+   Inputs y formularios
+   ──────────────────────────────────────────────── */
+.dv-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.dv-input::placeholder { color: var(--text-muted); }
+.dv-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.dv-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
+}
+
+/* ────────────────────────────────────────────────
+   Tablas
+   ──────────────────────────────────────────────── */
+.dv-table { width: 100%; font-size: 0.875rem; border-collapse: collapse; }
+.dv-table thead th {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  padding: 0.625rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.dv-table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.dv-table tbody tr { transition: background 0.12s ease; }
+.dv-table tbody tr:hover { background: var(--accent-soft); }
+.dv-table tbody tr:last-child td { border-bottom: none; }
+
+/* ────────────────────────────────────────────────
+   Animaciones y micro-interacciones
+   ──────────────────────────────────────────────── */
+@keyframes dv-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes dv-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes dv-scale-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes dv-slide-right {
+  from { opacity: 0; transform: translateX(48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes dv-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+@keyframes dv-grow-bar {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes dv-pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(78, 161, 255, 0.45); }
+  50%      { box-shadow: 0 0 0 10px rgba(78, 161, 255, 0); }
+}
+@keyframes dv-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
+}
+
+.dv-animate-up   { animation: dv-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.dv-animate-in   { animation: dv-fade-in 0.35s ease both; }
+.dv-animate-scale{ animation: dv-scale-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.dv-animate-panel{ animation: dv-slide-right 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.dv-pulse        { animation: dv-pulse-soft 3s ease-in-out infinite; }
+.dv-bounce       { animation: dv-bounce 1.6s ease-in-out infinite; }
+
+.dv-delay-1 { animation-delay: 0.05s; }
+.dv-delay-2 { animation-delay: 0.10s; }
+.dv-delay-3 { animation-delay: 0.15s; }
+.dv-delay-4 { animation-delay: 0.20s; }
+.dv-delay-5 { animation-delay: 0.25s; }
+.dv-delay-6 { animation-delay: 0.30s; }
+
+/* Card con elevación al pasar el mouse */
+.dv-hover-lift {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.dv-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px -12px rgba(30, 58, 95, 0.18);
+  border-color: var(--border-strong);
+}
+
+/* Skeleton de carga */
+.dv-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #EDF2F7 25%, #E0E9F2 50%, #EDF2F7 75%);
+  background-size: 200% 100%;
+  animation: dv-shimmer 1.4s linear infinite;
+}
+
+/* Barras de gráfico que crecen al montar */
+.dv-bar-grow {
+  transform-origin: bottom;
+  animation: dv-grow-bar 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Cabecera degradada */
+.dv-grad-navy {
+  background: linear-gradient(160deg, #16293F 0%, #1E3A5F 55%, #27497A 100%);
+}
+
+/* Tile de ícono para módulos */
+.dv-icon-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* Scrollbar sutil */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Modal (glassmorphism sutil) */
+.dv-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 41, 63, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: dv-fade-in 0.2s ease both;
+}
+.dv-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px -16px rgba(22, 41, 63, 0.35);
+  width: 100%;
+  animation: dv-scale-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Respetar reduce-motion */
+@media (prefers-reduced-motion: reduce) {
+  .dv-animate-up, .dv-animate-in, .dv-animate-scale, .dv-animate-panel,
+  .dv-bar-grow, .dv-skeleton, .dv-modal, .dv-modal-backdrop, .dv-pulse, .dv-bounce {
+    animation: none !important;
+  }
+  .dv-hover-lift, .dv-hover-lift:hover { transform: none; transition: none; }
 }

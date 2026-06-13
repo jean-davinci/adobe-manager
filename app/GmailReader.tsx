@@ -60,11 +60,11 @@ export default function GmailReader({ emailAdobe }: { emailAdobe: string }) {
   };
 
   return (
-    <div className="rounded-xl border border-gray-100 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+    <div className="rounded-xl border border-[var(--border)] overflow-hidden">
+      <div className="px-4 py-3 bg-[var(--surface-muted)] border-b border-[var(--border)] flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-gray-700">📬 Lector de Gmail</p>
-          <p className="text-xs text-gray-400">{emailAdobe}</p>
+          <p className="text-xs font-medium text-[var(--text-secondary)]">📬 Lector de Gmail</p>
+          <p className="text-xs text-[var(--text-muted)]">{emailAdobe}</p>
         </div>
         {!accessToken ? (
           <button onClick={handleLogin}
@@ -85,22 +85,22 @@ export default function GmailReader({ emailAdobe }: { emailAdobe: string }) {
 
       {!accessToken && (
         <div className="p-6 text-center">
-          <p className="text-sm text-gray-500 mb-1">Conecta el Gmail de esta cuenta Adobe</p>
-          <p className="text-xs text-gray-400">para ver los códigos de verificación automáticamente</p>
+          <p className="text-sm text-[var(--text-secondary)] mb-1">Conecta el Gmail de esta cuenta Adobe</p>
+          <p className="text-xs text-[var(--text-muted)]">para ver los códigos de verificación automáticamente</p>
         </div>
       )}
 
       {accessToken && loading && (
         <div className="p-6 text-center">
-          <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs text-gray-500">Buscando emails de Adobe...</p>
+          <div className="w-5 h-5 border-2 border-[var(--border-strong)] border-t-gray-900 rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-[var(--text-secondary)]">Buscando emails de Adobe...</p>
         </div>
       )}
 
       {accessToken && !loading && emails.length === 0 && (
         <div className="p-6 text-center">
-          <p className="text-sm text-gray-500">No se encontraron emails de Adobe recientes</p>
-          <p className="text-xs text-gray-400 mt-1">Los códigos de verificación aparecerán aquí</p>
+          <p className="text-sm text-[var(--text-secondary)]">No se encontraron emails de Adobe recientes</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1">Los códigos de verificación aparecerán aquí</p>
         </div>
       )}
 
@@ -124,9 +124,9 @@ export default function GmailReader({ emailAdobe }: { emailAdobe: string }) {
                   </button>
                 </div>
               )}
-              <p className="text-xs font-medium text-gray-700 mb-0.5">{email.subject}</p>
-              <p className="text-xs text-gray-400">{email.from}</p>
-              <p className="text-xs text-gray-300 mt-0.5">{new Date(email.date).toLocaleString('es-PE')}</p>
+              <p className="text-xs font-medium text-[var(--text-secondary)] mb-0.5">{email.subject}</p>
+              <p className="text-xs text-[var(--text-muted)]">{email.from}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">{new Date(email.date).toLocaleString('es-PE')}</p>
             </div>
           ))}
         </div>

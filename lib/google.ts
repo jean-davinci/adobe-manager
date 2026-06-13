@@ -33,3 +33,7 @@ export function getGmailClient() {
 export function getDriveClient() {
   return google.drive({ version: 'v3', auth: getOAuth2Client() });
 }
+
+export function getCalendarClient() {
+  return google.calendar({ version: 'v3', auth: getOAuth2Client() });
+}

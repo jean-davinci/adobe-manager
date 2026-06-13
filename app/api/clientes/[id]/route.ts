@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { actualizarCliente, eliminarCliente } from '@/lib/clientes';
 import { enviarCodigoAcceso } from '@/lib/automatizaciones';
 import { notificarRenovacion } from '@/lib/email';
+import { requireApi } from '@/lib/api-auth';
 
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const { id } = await context.params;
     const body = await req.json();
@@ -27,6 +31,9 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 }
 
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const auth = await requireApi('ADMIN', 'OPERATOR');
+  if (!auth.ok) return auth.response;
+
   try {
     const { id } = await context.params;
     await eliminarCliente(id);

@@ -2,9 +2,11 @@
 
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getUsuarioByEmail } from '@/lib/usuarios';
 import { createSession, deleteSession } from '@/lib/session';
+import { rateLimit, clienteIP } from '@/lib/rate-limit';
 
 const LoginSchema = z.object({
   email: z.email({ error: 'Ingresa un email válido.' }).trim().toLowerCase(),
@@ -30,6 +32,13 @@ export async function login(
   }
 
   const { email, password } = parsed.data;
+
+  // Anti fuerza bruta: máx. 8 intentos por IP cada 5 minutos.
+  const ip = clienteIP(await headers());
+  const limite = rateLimit(`login:${ip}`, 8, 5 * 60 * 1000);
+  if (!limite.ok) {
+    return { error: `Demasiados intentos. Vuelve a intentar en ${limite.retryAfter}s.` };
+  }
 
   const usuario = await getUsuarioByEmail(email);
 

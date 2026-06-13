@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 
 export default function Metricas({ refresh }: { refresh: number }) {
-  const [stats, setStats] = useState({
-    total: 0, activos: 0, inactivos: 0, vencenPronto: 0, ingresosMes: 0,
-  });
+  const [stats, setStats] = useState<{
+    total: number; activos: number; inactivos: number; vencenPronto: number; ingresosMes: number;
+  } | null>(null);
 
   useEffect(() => {
     fetch('/api/clientes')
@@ -28,22 +28,29 @@ export default function Metricas({ refresh }: { refresh: number }) {
       });
   }, [refresh]);
 
-  const cards = [
-    { label: 'Clientes activos', value: stats.activos, sub: `de ${stats.total} totales`, color: 'text-gray-900', bg: 'bg-white' },
-    { label: 'Ingresos estimados', value: `S/. ${stats.ingresosMes.toFixed(2)}`, sub: 'este mes', color: 'text-green-600', bg: 'bg-white' },
-    { label: 'Por vencer', value: stats.vencenPronto, sub: 'en los próximos 15 días', color: stats.vencenPronto > 0 ? 'text-orange-500' : 'text-gray-900', bg: 'bg-white' },
-    { label: 'Inactivos', value: stats.inactivos, sub: 'clientes cancelados', color: stats.inactivos > 0 ? 'text-red-400' : 'text-gray-400', bg: 'bg-white' },
+  const cards = stats == null ? null : [
+    { label: 'Clientes activos', value: stats.activos, sub: `de ${stats.total} totales`, color: 'var(--text-primary)' },
+    { label: 'Ingresos estimados', value: `S/. ${stats.ingresosMes.toFixed(2)}`, sub: 'este mes', color: 'var(--success)' },
+    { label: 'Por vencer', value: stats.vencenPronto, sub: 'en los próximos 15 días', color: stats.vencenPronto > 0 ? 'var(--warning)' : 'var(--text-primary)' },
+    { label: 'Inactivos', value: stats.inactivos, sub: 'clientes cancelados', color: stats.inactivos > 0 ? 'var(--danger)' : 'var(--text-muted)' },
   ];
 
   return (
-    <div className="grid grid-cols-4 gap-4 mb-8">
-      {cards.map((card) => (
-        <div key={card.label} className={`${card.bg} rounded-2xl border border-gray-100 p-5 shadow-sm`}>
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">{card.label}</p>
-          <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
-          <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
-        </div>
-      ))}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {cards == null
+        ? [0, 1, 2, 3].map((i) => (
+            <div key={i} className="dv-card p-5">
+              <div className="dv-skeleton h-3 w-24 mb-3" />
+              <div className="dv-skeleton h-8 w-20" />
+            </div>
+          ))
+        : cards.map((card, i) => (
+            <div key={card.label} className={`dv-card dv-hover-lift p-5 dv-animate-up dv-delay-${i + 1}`}>
+              <p className="dv-eyebrow mb-2">{card.label}</p>
+              <p className="text-2xl font-bold font-serif" style={{ color: card.color }}>{card.value}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{card.sub}</p>
+            </div>
+          ))}
     </div>
   );
 }

@@ -1,17 +1,24 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import Sidebar from './Sidebar';
+import Sidebar, { type SesionUI } from './Sidebar';
 
-export default function LayoutShell({ children }: { children: React.ReactNode }) {
+export default function LayoutShell({
+  children,
+  sesion,
+}: {
+  children: React.ReactNode;
+  sesion: SesionUI;
+}) {
   const pathname = usePathname() ?? '';
-  // Rutas que NO usan el sidebar legacy (Adobe/Servicios): la landing pública,
-  // el login y las zonas con su propia cabecera (dashboard, portal del cliente).
+  // Rutas sin sidebar: landing pública ('/'), login y portal del cliente.
   const sinSidebar =
+    pathname === '/' ||
     pathname.startsWith('/excelencia') ||
     pathname === '/login' ||
-    pathname.startsWith('/dashboard') ||
     pathname.startsWith('/mi-acceso') ||
-    pathname.startsWith('/portal');
+    pathname.startsWith('/portal') ||
+    sesion?.rol === 'CLIENT' ||
+    !sesion;
 
   if (sinSidebar) {
     return <main className="min-h-screen">{children}</main>;
@@ -19,7 +26,7 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar sesion={sesion} />
       <main className="flex-1 min-w-0 min-h-screen overflow-x-hidden">{children}</main>
     </div>
   );
