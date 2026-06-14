@@ -76,6 +76,15 @@ const NAV_MODULOS: NavItem[] = [
   },
 ];
 
+const NAV_PORTAL: NavItem[] = [
+  {
+    href: '/dashboard/portal',
+    label: 'Portal Clientes',
+    sublabel: 'Pedidos · Pagos · Accesos',
+    icon: ic(<><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>),
+  },
+];
+
 const NAV_SISTEMA: NavItem[] = [
   {
     href: '/dashboard/integraciones',
@@ -204,6 +213,7 @@ export default function Sidebar({ sesion }: { sesion: SesionUI }) {
       <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-3'} pb-4 overflow-y-auto overflow-x-hidden`}>
         {seccion('Principal', NAV_PRINCIPAL)}
         {seccion('Módulos', NAV_MODULOS)}
+        {seccion('Portal', NAV_PORTAL)}
         {seccion('Sistema', NAV_SISTEMA)}
       </nav>
 

@@ -1,6 +1,7 @@
 import 'server-only';
 import { query, queryOne } from './db';
 
+// `etapa` se añade en la migración 009; valores válidos en ETAPAS.
 export type Contacto = {
   id: string;
   user_id: string | null;
@@ -9,6 +10,7 @@ export type Contacto = {
   email: string | null;
   etiquetas: string[];
   notas: string | null;
+  etapa: string;
   created_at: string;
   updated_at: string;
 };
@@ -124,6 +126,17 @@ export function setEtiquetas(id: string, etiquetas: string[]): Promise<Contacto 
 
 export function setNotas(id: string, notas: string): Promise<Contacto | null> {
   return queryOne<Contacto>('update contactos set notas = $2 where id = $1 returning *', [id, notas]);
+}
+
+// ─── Pipeline Kanban ──────────────────────────────────────────────────────
+export const ETAPAS = ['Nuevo', 'Contactado', 'En proceso', 'Pagado', 'Completado'] as const;
+export type Etapa = (typeof ETAPAS)[number];
+
+export function setEtapa(id: string, etapa: Etapa): Promise<Contacto | null> {
+  return queryOne<Contacto>(
+    'update contactos set etapa = $2 where id = $1 returning *',
+    [id, etapa]
+  );
 }
 
 export function listarMensajes(contactoId: string): Promise<Mensaje[]> {

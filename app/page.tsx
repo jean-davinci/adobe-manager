@@ -3,9 +3,35 @@ import { listarDocumentos } from '@/lib/documentos';
 import { listarClientes } from '@/lib/clientes';
 
 export const metadata = {
-  title: 'Davinci Labs — Automatizamos tu trabajo académico',
+  title: 'Pasada de Turnitin en Perú | Informe con Baja Similitud | Davinci Labs',
   description:
-    'Detección de IA, similitud Turnitin, informes automáticos, gestión de afiliados Adobe y asesoría académica. Resultados precisos, entrega inmediata.',
+    'Obtén tu informe Turnitin con porcentaje de similitud reducido. Detectamos IA, verificamos originalidad para tesis, ensayos y trabajos académicos. Resultados en minutos. Perú.',
+  keywords: [
+    'pasada de turnitin',
+    'informe turnitin peru',
+    'bajar similitud turnitin',
+    'reducir similitud turnitin',
+    'turnitin online peru',
+    'pasar turnitin',
+    'verificar plagio turnitin',
+    'detector de plagio universitario',
+    'turnitin para tesis',
+    'porcentaje similitud turnitin',
+    'informe originalidad turnitin',
+    'detector ia turnitin',
+    'similitud turnitin peru',
+    'turnitin tesis peru',
+  ],
+  openGraph: {
+    title: 'Pasada de Turnitin | Informe con Baja Similitud | Davinci Labs',
+    description:
+      'Procesamos tu tesis o trabajo con Turnitin y te entregamos el informe oficial. Similitud reducida, detección de IA, entrega en minutos.',
+    url: 'https://davincilabs.pe',
+    siteName: 'Davinci Labs',
+    locale: 'es_PE',
+    type: 'website',
+  },
+  alternates: { canonical: 'https://davincilabs.pe' },
 };
 
 // Si la DB no responde, la landing muestra valores base.
