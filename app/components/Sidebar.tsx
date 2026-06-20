@@ -87,9 +87,16 @@ const NAV_PORTAL: NavItem[] = [
 
 const NAV_SISTEMA: NavItem[] = [
   {
+    href: '/dashboard/whatsapp',
+    label: 'WhatsApp',
+    sublabel: 'Vincular número',
+    adminOnly: true,
+    icon: ic(<><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></>),
+  },
+  {
     href: '/dashboard/integraciones',
     label: 'Integraciones',
-    sublabel: 'Gmail · Drive · WhatsApp',
+    sublabel: 'Gmail · Drive · API',
     adminOnly: true,
     icon: ic(<><path d="M9 2v6M15 2v6M9 22v-3M15 22v-3" /><rect x="5" y="8" width="14" height="11" rx="2" /></>),
   },
