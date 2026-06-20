@@ -1,7 +1,10 @@
 import 'server-only';
 import { query, queryOne } from './db';
-export { PAQUETES } from './portal-config';
-export type { CreditosCliente, CompraCreditos, PedidoTurnitin, AccesoServicio, CuentaAdobeCliente } from './portal-types';
+import { PAQUETES } from './portal-config';
+import type { CreditosCliente, CompraCreditos, PedidoTurnitin, AccesoServicio, CuentaAdobeCliente } from './portal-types';
+
+export { PAQUETES };
+export type { CreditosCliente, CompraCreditos, PedidoTurnitin, AccesoServicio, CuentaAdobeCliente };
 
 // ─── Créditos ─────────────────────────────────────────────────────────────────
 export async function getSaldo(usuarioId: string): Promise<number> {
