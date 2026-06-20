@@ -15,6 +15,7 @@ export default function LayoutShell({
     pathname === '/' ||
     pathname.startsWith('/excelencia') ||
     pathname === '/login' ||
+    pathname === '/registro' ||
     pathname.startsWith('/mi-acceso') ||
     pathname.startsWith('/portal') ||
     sesion?.rol === 'CLIENT' ||

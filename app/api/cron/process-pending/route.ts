@@ -67,10 +67,42 @@ export async function GET(req: NextRequest) {
     // Módulo de asesorías aún sin migrar — ignorar.
   }
 
+  // ── Reporte diario del agente Davinci (8:00 Lima) ────────────────────────
+  // Si son entre 8:00 y 8:09 hora Lima y aún no hay reporte de hoy, lo genera.
+  let reporteGenerado = false;
+  try {
+    const horaLima = new Date().toLocaleTimeString('en-GB', {
+      timeZone: 'America/Lima', hour12: false, hour: '2-digit', minute: '2-digit',
+    });
+    const [h, m] = horaLima.split(':').map(Number);
+    if (h === 8 && m < 10) {
+      const hoyLima = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+      const existe = await query<{ id: string }>(`select id from reportes_agente where fecha = $1`, [hoyLima]);
+      if (existe.length === 0) {
+        const { generarReporteDiario } = await import('@/lib/agente-acciones');
+        await generarReporteDiario(hoyLima);
+        reporteGenerado = true;
+      }
+    }
+  } catch (e) {
+    console.error('[cron] reporte diario falló:', e);
+  }
+
+  // ── Avisos proactivos del agente ─────────────────────────────────────────
+  let avisos = 0;
+  try {
+    const { generarAvisosProactivos } = await import('@/lib/agente-acciones');
+    avisos = await generarAvisosProactivos();
+  } catch (e) {
+    console.error('[cron] avisos proactivos falló:', e);
+  }
+
   return NextResponse.json({
     processed: resultados.filter((r) => r.status !== 'error').length,
     failed: resultados.filter((r) => r.status === 'error').length,
     recordatorios,
+    reporteGenerado,
+    avisos,
     resultados,
     timestamp: new Date().toISOString(),
   });

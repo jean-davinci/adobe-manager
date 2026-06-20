@@ -25,7 +25,7 @@ export async function requireRole(...roles: Rol[]): Promise<SessionPayload> {
   const session = await verifySession();
   if (!roles.includes(session.rol)) {
     // El cliente no entra al área de staff y viceversa.
-    redirect(session.rol === 'CLIENT' ? '/mi-acceso' : '/dashboard');
+    redirect(session.rol === 'CLIENT' ? '/portal' : '/dashboard');
   }
   return session;
 }

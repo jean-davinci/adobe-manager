@@ -1,0 +1,18 @@
+{
+  "name": "davinci-whatsapp-service",
+  "version": "1.0.0",
+  "description": "WhatsApp microservice for Davinci Labs CRM",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.26.1-alpha.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

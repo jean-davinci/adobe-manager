@@ -76,11 +76,27 @@ const NAV_MODULOS: NavItem[] = [
   },
 ];
 
+const NAV_PORTAL: NavItem[] = [
+  {
+    href: '/dashboard/portal',
+    label: 'Portal Clientes',
+    sublabel: 'Pedidos · Pagos · Accesos',
+    icon: ic(<><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>),
+  },
+];
+
 const NAV_SISTEMA: NavItem[] = [
+  {
+    href: '/dashboard/whatsapp',
+    label: 'WhatsApp',
+    sublabel: 'Vincular número',
+    adminOnly: true,
+    icon: ic(<><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></>),
+  },
   {
     href: '/dashboard/integraciones',
     label: 'Integraciones',
-    sublabel: 'Gmail · Drive · WhatsApp',
+    sublabel: 'Gmail · Drive · API',
     adminOnly: true,
     icon: ic(<><path d="M9 2v6M15 2v6M9 22v-3M15 22v-3" /><rect x="5" y="8" width="14" height="11" rx="2" /></>),
   },
@@ -204,6 +220,7 @@ export default function Sidebar({ sesion }: { sesion: SesionUI }) {
       <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-3'} pb-4 overflow-y-auto overflow-x-hidden`}>
         {seccion('Principal', NAV_PRINCIPAL)}
         {seccion('Módulos', NAV_MODULOS)}
+        {seccion('Portal', NAV_PORTAL)}
         {seccion('Sistema', NAV_SISTEMA)}
       </nav>
 

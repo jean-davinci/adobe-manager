@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/dal';
 import LoginForm from './LoginForm';
@@ -9,7 +10,7 @@ export default async function LoginPage() {
   // Si ya hay sesión, fuera de aquí.
   const session = await getSession();
   if (session?.userId) {
-    redirect(session.rol === 'CLIENT' ? '/mi-acceso' : '/dashboard');
+    redirect(session.rol === 'CLIENT' ? '/portal' : '/dashboard');
   }
 
   return (
@@ -56,7 +57,21 @@ export default async function LoginPage() {
       </section>
 
       {/* Formulario */}
-      <section className="flex-1 flex items-center justify-center px-4 py-10">
+      <section className="flex-1 flex items-center justify-center px-4 py-10 relative">
+        {/* Botón volver al inicio */}
+        <div className="absolute top-5 right-5">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-black/[0.05]"
+            style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            Volver al inicio
+          </Link>
+        </div>
+
         <div className="w-full max-w-sm">
           {/* Marca compacta para pantallas pequeñas */}
           <div className="lg:hidden flex flex-col items-center mb-8 dv-animate-up">
@@ -64,7 +79,7 @@ export default async function LoginPage() {
               <Image src="/logo-icon.svg" alt="Davinci Labs" fill sizes="48px" className="object-contain rounded-xl" priority />
             </div>
             <h1 className="font-serif text-xl font-semibold" style={{ color: 'var(--brand)' }}>Davinci Labs</h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Plataforma de gestión interna</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Portal de clientes</p>
           </div>
 
           <div className="dv-animate-up dv-delay-1">
@@ -80,8 +95,37 @@ export default async function LoginPage() {
             <LoginForm />
           </div>
 
-          <p className="text-center text-xs mt-6 dv-animate-in dv-delay-3" style={{ color: 'var(--text-muted)' }}>
-            ¿Problemas para entrar? Contacta a un administrador.
+          {/* Crear cuenta */}
+          <div
+            className="mt-4 p-4 rounded-xl text-center dv-animate-in dv-delay-3"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
+            <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+              ¿Eres cliente nuevo?
+            </p>
+            <Link
+              href="/registro"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:shadow-md hover:-translate-y-0.5"
+              style={{ background: 'var(--brand)' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+              Crear cuenta gratis
+            </Link>
+          </div>
+
+          <p className="text-center text-xs mt-4 dv-animate-in dv-delay-4" style={{ color: 'var(--text-muted)' }}>
+            ¿Problemas para entrar?{' '}
+            <a
+              href="https://wa.me/51987654321"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              style={{ color: 'var(--brand)' }}
+            >
+              Contáctanos
+            </a>
           </p>
         </div>
       </section>

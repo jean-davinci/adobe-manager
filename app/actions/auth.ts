@@ -58,7 +58,7 @@ export async function login(
     nombre: usuario.nombre,
   });
 
-  redirect(usuario.rol === 'CLIENT' ? '/mi-acceso' : '/dashboard');
+  redirect(usuario.rol === 'CLIENT' ? '/portal' : '/dashboard');
 }
 
 export async function logout(): Promise<void> {
